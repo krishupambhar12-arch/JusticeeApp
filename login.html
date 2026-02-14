@@ -34,6 +34,7 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             min-height: 900px;
+            position: relative;
         }
 
         /* Left Side - Branding */
@@ -45,6 +46,39 @@
             flex-direction: column;
             justify-content: center;
             color: white;
+            position: relative;
+        }
+
+        /* Back Arrow */
+        .back-arrow {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .back-arrow:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .back-arrow i {
+            font-size: 20px;
+        }
+
+        .brand-content {
+            margin-top: 20px;
         }
 
         .brand-content h1 {
@@ -82,13 +116,20 @@
             font-size: 20px;
         }
 
-        /* Right Side - Signup Form */
+        /* Right Side - Forms */
         .forms-side {
             flex: 1;
             padding: 50px 60px;
             background: white;
             display: flex;
             flex-direction: column;
+            justify-content: center;
+        }
+
+        .forms-content {
+            max-width: 450px;
+            width: 100%;
+            margin: 0 auto;
         }
 
         .header-text h2 {
@@ -96,12 +137,14 @@
             font-size: 36px;
             font-weight: 700;
             margin-bottom: 10px;
+            text-align: center;
         }
 
         .header-text p {
             color: #5C4750;
             font-size: 16px;
             margin-bottom: 30px;
+            text-align: center;
         }
 
         .toggle-tabs {
@@ -110,6 +153,7 @@
             margin-bottom: 40px;
             border-bottom: 2px solid #E6DDD0;
             padding-bottom: 15px;
+            justify-content: center;
         }
 
         .toggle-tab {
@@ -136,17 +180,20 @@
             background: #5C4750;
         }
 
-        /* Signup Form */
-        .signup-form {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
+        /* Forms */
+        .form {
+            display: none;
+        }
+
+        .form.active {
+            display: block;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
             gap: 8px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
@@ -175,11 +222,27 @@
             font-weight: 400;
         }
 
+        .forgot-password {
+            text-align: right;
+            margin: -10px 0 25px;
+        }
+
+        .forgot-password a {
+            color: #5C4750;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
         .checkbox-group {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin: 5px 0;
+            margin: 5px 0 25px;
         }
 
         .checkbox-group input[type="checkbox"] {
@@ -201,7 +264,7 @@
             font-weight: 600;
         }
 
-        .btn-create {
+        .btn-action {
             width: 100%;
             padding: 16px;
             background: #5C4750;
@@ -215,7 +278,7 @@
             margin: 10px 0 20px;
         }
 
-        .btn-create:hover {
+        .btn-action:hover {
             background: #1E252B;
         }
 
@@ -250,7 +313,7 @@
             display: flex;
             gap: 15px;
             justify-content: space-between;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .social-btn {
@@ -280,20 +343,6 @@
             border-color: #5C4750;
         }
 
-        .activate-windows {
-            margin-top: auto;
-            text-align: center;
-            color: #999;
-            font-size: 13px;
-            padding: 20px 0 0;
-            border-top: 1px solid #E6DDD0;
-        }
-
-        .activate-windows i {
-            margin-right: 5px;
-            color: #5C4750;
-        }
-
         hr {
             border: none;
             border-top: 2px solid #E6DDD0;
@@ -308,13 +357,21 @@
             .forms-side {
                 padding: 40px;
             }
+            
+            .back-arrow {
+                top: 20px;
+                left: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Left Side - Branding -->
+        <!-- Left Side - Branding with Back Arrow -->
         <div class="brand-side">
+            <div class="back-arrow" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i>
+            </div>
             <div class="brand-content">
                 <h1>Justice<br><span>Point</span></h1>
                 <p>Your trusted partner for legal appointments and case management</p>
@@ -327,82 +384,129 @@
             </div>
         </div>
 
-        <!-- Right Side - Signup Form -->
+        <!-- Right Side - Forms -->
         <div class="forms-side">
-            <div class="header-text">
-                <h2>Get Started</h2>
-                <p>Login to your account or create a new one</p>
-            </div>
-
-            <div class="toggle-tabs">
-                <span class="toggle-tab">Login</span>
-                <span class="toggle-tab active">Sign Up</span>
-            </div>
-
-            <div class="signup-form">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" placeholder="Enter your full name">
+            <div class="forms-content">
+                <div class="header-text">
+                    <h2>Get Started</h2>
+                    <p>Login to your account or create a new one</p>
                 </div>
 
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" placeholder="Enter your email">
+                <div class="toggle-tabs">
+                    <span class="toggle-tab" id="loginTab">Login</span>
+                    <span class="toggle-tab active" id="signupTab">Sign Up</span>
                 </div>
 
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" placeholder="Create a password">
+                <!-- Login Form -->
+                <div id="loginForm" class="form">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" placeholder="Enter your email">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" placeholder="Enter your password">
+                    </div>
+
+                    <div class="forgot-password">
+                        <a href="#">Forgot Password?</a>
+                    </div>
+
+                    <button class="btn-action">Login</button>
+
+                    <div class="divider">
+                        Or continue with
+                    </div>
+
+                    <div class="social-buttons">
+                        <button class="social-btn">
+                            <i class="fab fa-google"></i>
+                            Google
+                        </button>
+                        <button class="social-btn">
+                            <i class="fab fa-facebook-f"></i>
+                            Facebook
+                        </button>
+                        <button class="social-btn">
+                            <i class="fab fa-linkedin-in"></i>
+                            LinkedIn
+                        </button>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Confirm Password</label>
-                    <input type="password" placeholder="Confirm your password">
-                </div>
+                <!-- Signup Form -->
+                <div id="signupForm" class="form active">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" placeholder="Enter your full name">
+                    </div>
 
-                <div class="checkbox-group">
-                    <input type="checkbox" id="terms">
-                    <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
-                </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" placeholder="Enter your email">
+                    </div>
 
-                <hr>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" placeholder="Create a password">
+                    </div>
 
-                <button class="btn-create">Create Account</button>
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" placeholder="Confirm your password">
+                    </div>
 
-                <div class="divider">
-                    Or continue with
-                </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="terms">
+                        <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+                    </div>
 
-                <div class="social-buttons">
-                    <button class="social-btn">
-                        <i class="fab fa-google"></i>
-                        Google
-                    </button>
-                    <button class="social-btn">
-                        <i class="fab fa-facebook-f"></i>
-                        Facebook
-                    </button>
-                    <button class="social-btn">
-                        <i class="fab fa-linkedin-in"></i>
-                        LinkedIn
-                    </button>
-                </div>
+                    <hr>
 
-                <div class="activate-windows">
-                    <i class="fas fa-shield"></i> Activate Windows
-                    <span style="display: block; font-size: 11px; margin-top: 5px;">Go to Settings to activate Windows.</span>
+                    <button class="btn-action">Create Account</button>
+
+                    <div class="divider">
+                        Or continue with
+                    </div>
+
+                    <div class="social-buttons">
+                        <button class="social-btn">
+                            <i class="fab fa-google"></i>
+                            Google
+                        </button>
+                        <button class="social-btn">
+                            <i class="fab fa-facebook-f"></i>
+                            Facebook
+                        </button>
+                        <button class="social-btn">
+                            <i class="fab fa-linkedin-in"></i>
+                            LinkedIn
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Simple toggle for demonstration (you can expand this)
-        document.querySelectorAll('.toggle-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.toggle-tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-            });
+        const loginTab = document.getElementById('loginTab');
+        const signupTab = document.getElementById('signupTab');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+
+        loginTab.addEventListener('click', function() {
+            loginTab.classList.add('active');
+            signupTab.classList.remove('active');
+            loginForm.classList.add('active');
+            signupForm.classList.remove('active');
+        });
+
+        signupTab.addEventListener('click', function() {
+            signupTab.classList.add('active');
+            loginTab.classList.remove('active');
+            signupForm.classList.add('active');
+            loginForm.classList.remove('active');
         });
     </script>
 </body>
