@@ -22,7 +22,7 @@ const ClientConsultation = () => {
 
   useEffect(() => {
     fetchConsultations();
-    fetchDoctors();
+    fetchAttorneys();
   }, []);
 
   useEffect(() => {

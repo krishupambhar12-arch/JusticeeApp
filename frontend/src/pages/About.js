@@ -44,13 +44,15 @@ const About = () => {
         </div>
 
         {/* Hospital Photos Gallery */}
-        <h2 className="gallery-title">Our Hospital</h2>
+        <h2 className="gallery-title">Our Law Firm</h2>
         <div className="hospital-gallery">
-          <img src="/images/about/about2.jpg" alt="Hospital 2" />
-          <img src="/images/about/about3.jpg" alt="Hospital 3" />
-          <img src="/images/about/about5.jpeg" alt="Hospital 5" />
-          <img src="/images/about/about6.jpg" alt="Hospital 6" />
-          <img src="/images/about/about7.webp" alt="Hospital 7" />
+          <img src="/images/about/1.jpg" alt="Law 2" />
+          <img src="/images/about/2.jpg" alt="Law 3" />
+          <img src="/images/about/4.jpg" alt="Law 6" />
+          <img src="/images/about/3.jpeg" alt="Law 5" />
+          <img src="/images/about/6.jpg" alt="Law 7" />
+          <img src="/images/about/5.jpg" alt="Law 7" />
+
         </div>
 
       </div>

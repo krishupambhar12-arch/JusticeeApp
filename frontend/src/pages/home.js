@@ -83,9 +83,9 @@ const Home = () => {
       {/* Banner Slider */}
       <div className="banner-slider">
         <Slider {...sliderSettings}>
-          <div><img src="/images/banner/1.avif" alt="Hospital 1" /></div>
-          <div><img src="/images/banner/2.webp" alt="Hospital 2" /></div>
-          <div><img src="/images/banner/3.jpg" alt="Hospital 3" /></div>
+          <div><img src="/images/banner/1.avif" alt="Law 1" /></div>
+          <div><img src="/images/banner/2.webp" alt="Law 2" /></div>
+          <div><img src="/images/banner/3.jpg" alt="Law 3" /></div>
         </Slider>
       </div>
       <div className="home-cards">
