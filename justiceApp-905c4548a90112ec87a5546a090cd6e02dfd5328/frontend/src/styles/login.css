@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import './variables.css';
+
+.login-container {
+  min-height: 100vh;
+  background-color: var(--color-lightest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Roboto', sans-serif;
+  padding: 20px;
+}
+
+.login-form {
+  background-color: #fff;
+  padding: 40px 30px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(16, 9, 29, 0.2);
+  width: 100%;
+  max-width: 420px;
+  transition: transform 0.3s ease;
+}
+
+.login-form:hover {
+  transform: translateY(-3px);
+}
+
+.login-form h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--color-dark-purple);
+  font-size: 28px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-muted-purple);
+  font-weight: 500;
+}
+
+.login-form .form-group input {
+  padding: 10px;
+  border: 2px solid var(--color-muted-purple); /* full border */
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: #fdfdfd;
+  transition: border-color 0.3s ease;
+  color: #333;
+  box-sizing: border-box;
+}
+ 
+
+.form-group input:focus {
+  border-color: var(--color-deep-purple); /* Highlight on focus */
+  outline: none;
+}
+
+.form-links {
+  text-align: right;
+  margin-bottom: 18px;
+}
+
+.forgot-password {
+  font-size: 14px;
+  color: var(--color-dark-purple);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+  color: var(--color-muted-purple);
+}
+
+.login-button {
+  background-color: var(--color-regular-purple);
+  color: white;
+  border: none;
+  padding: 12px;
+  width: 100%;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: var(--color-deep-purple);
+}
+
+.register-link {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.register-link a {
+  color: var(--color-regular-purple);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+  color: var(--color-dark-purple);
+}

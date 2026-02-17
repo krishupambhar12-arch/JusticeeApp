@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import './variables.css';
+
+.register-container {
+  min-height: 100vh;
+  background-color: var(--color-lightest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-main);
+  padding: 20px;
+}
+
+.register-form {
+  background-color: #fff;
+  padding: 40px 30px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(16, 9, 29, 0.2);
+  width: 100%;
+  max-width: 480px;
+  transition: transform 0.3s ease;
+}
+
+.register-form:hover {
+  transform: translateY(-3px);
+}
+
+.register-form h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: var(--color-dark-purple);
+  font-size: 28px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-muted-purple);
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 10px;
+  width: 100%;
+  border: 1.5px solid var(--color-regular-purple);
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: #fdfdfd;
+  color: #333;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.register-form input[type="date"],
+.register-form input[type="email"],
+.register-form input[type="tel"],
+.register-form input[type="password"],
+.register-form input[type="text"] {
+  border: 2px solid var(--color-muted-purple);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--color-deep-purple);
+  outline: none;
+}
+
+.gender-options {
+  display: flex;
+  gap: 15px;
+  margin-top: 6px;
+  color: var(--color-regular-purple);
+}
+
+.gender-options label {
+  font-weight: 400;
+  font-size: 15px;
+  color: var(--color-nearly-black);
+}
+
+.register-button {
+  background-color: var(--color-regular-purple);
+  color: white;
+  border: none;
+  padding: 12px;
+  width: 100%;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.register-button:hover {
+  background-color: var(--color-deep-purple);
+}
+
+.login-redirect {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.login-redirect a {
+  color: var(--color-regular-purple);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-redirect a:hover {
+  color: var(--color-dark-purple);
+  text-decoration: underline;
+}
