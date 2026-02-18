@@ -53,6 +53,13 @@ export const API = {
   ADMIN_LAB_TEST_BOOKINGS: `${BASE_URL}/admin/lab-test-bookings`,
   ADMIN_UPDATE_LAB_TEST_BOOKING_STATUS: `${BASE_URL}/admin/lab-test-bookings`,
   ADMIN_DELETE_LAB_TEST_BOOKING: `${BASE_URL}/admin/lab-test-bookings`,
+  // Admin Service APIs
+  ADMIN_SERVICES: `${BASE_URL}/admin/services`,
+  ADMIN_CREATE_SERVICE: `${BASE_URL}/admin/services`,
+  ADMIN_UPDATE_SERVICE: `${BASE_URL}/admin/services`,
+  ADMIN_DELETE_SERVICE: `${BASE_URL}/admin/services`,
+  // Public Services API
+  ALL_SERVICES: `${BASE_URL}/services`,
   // Consultation APIs
   CONSULTATION_ATTORNEYS: `${BASE_URL}/user/consultation/attorneys`,
   CREATE_CONSULTATION: `${BASE_URL}/user/consultation`,

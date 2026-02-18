@@ -9,6 +9,7 @@ const LabTest = require("../models/LabTest");
 const LabTestBooking = require("../models/LabTestBooking");
 const Consultation = require("../models/Consultation");
 const ConsultationMessage = require("../models/ConsultationMessage");
+const Service = require("../models/Service");
 const auth = require("../middleware/auth");
 
 // ===== TEST ROUTE =====
@@ -530,6 +531,134 @@ router.get("/doctors", auth, async (req, res) => {
     });
   } catch (error) {
     console.error("Admin get doctors error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ===== CREATE Attorney (Admin) =====
+router.post("/doctors", auth, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.userRole !== "Admin") {
+      return res.status(403).json({ message: "Only admins can access this endpoint" });
+    }
+
+    const { userId, specialization, qualification, experience, fees } = req.body;
+
+    if (!userId || !specialization || !qualification || !experience || !fees) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const attorney = new Attorney({
+      userId,
+      specialization,
+      qualification,
+      experience: parseInt(experience),
+      fees: parseFloat(fees)
+    });
+
+    await attorney.save();
+
+    const populatedAttorney = await Attorney.findById(attorney._id)
+      .populate('userId', 'name email phone');
+
+    const transformedAttorney = {
+      id: populatedAttorney._id,
+      name: populatedAttorney.userId?.name || "Unknown",
+      email: populatedAttorney.userId?.email || "Unknown",
+      phone: populatedAttorney.userId?.phone || "Unknown",
+      specialization: populatedAttorney.specialization,
+      fees: populatedAttorney.fees,
+      experience: populatedAttorney.experience,
+      qualification: populatedAttorney.qualification,
+      createdAt: populatedAttorney.createdAt
+    };
+
+    res.status(201).json({
+      message: "Attorney created successfully",
+      attorney: transformedAttorney
+    });
+  } catch (error) {
+    console.error("Admin create attorney error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ===== UPDATE Attorney (Admin) =====
+router.put("/doctors/:id", auth, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.userRole !== "Admin") {
+      return res.status(403).json({ message: "Only admins can access this endpoint" });
+    }
+
+    const { id } = req.params;
+    const { userId, specialization, qualification, experience, fees } = req.body;
+
+    if (!userId || !specialization || !qualification || !experience || !fees) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const attorney = await Attorney.findByIdAndUpdate(
+      id,
+      {
+        userId,
+        specialization,
+        qualification,
+        experience: parseInt(experience),
+        fees: parseFloat(fees)
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!attorney) {
+      return res.status(404).json({ message: "Attorney not found" });
+    }
+
+    const populatedAttorney = await Attorney.findById(attorney._id)
+      .populate('userId', 'name email phone');
+
+    const transformedAttorney = {
+      id: populatedAttorney._id,
+      name: populatedAttorney.userId?.name || "Unknown",
+      email: populatedAttorney.userId?.email || "Unknown",
+      phone: populatedAttorney.userId?.phone || "Unknown",
+      specialization: populatedAttorney.specialization,
+      fees: populatedAttorney.fees,
+      experience: populatedAttorney.experience,
+      qualification: populatedAttorney.qualification,
+      createdAt: populatedAttorney.createdAt
+    };
+
+    res.json({
+      message: "Attorney updated successfully",
+      attorney: transformedAttorney
+    });
+  } catch (error) {
+    console.error("Admin update attorney error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ===== DELETE Attorney (Admin) =====
+router.delete("/doctors/:id", auth, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.userRole !== "Admin") {
+      return res.status(403).json({ message: "Only admins can access this endpoint" });
+    }
+
+    const { id } = req.params;
+
+    const attorney = await Attorney.findByIdAndDelete(id);
+
+    if (!attorney) {
+      return res.status(404).json({ message: "Attorney not found" });
+    }
+
+    res.json({ message: "Attorney deleted successfully" });
+  } catch (error) {
+    console.error("Admin delete attorney error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -1325,6 +1454,169 @@ router.post("/consultations/:consultationId/reply", auth, async (req, res) => {
     });
   } catch (error) {
     console.error("Admin reply to consultation error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ===== SERVICE MANAGEMENT ROUTES =====
+
+// GET All Services
+router.get("/services", auth, async (req, res) => {
+  try {
+    if (req.userRole !== "Admin") {
+      return res.status(403).json({ message: "Only admins can access this endpoint" });
+    }
+
+    const services = await Service.find({ is_active: true })
+      .sort({ created_at: -1 })
+      .lean();
+
+    // Transform _id to id for frontend consistency
+    const transformedServices = services.map(service => ({
+      id: service._id,
+      service_name: service.service_name,
+      description: service.description,
+      price: service.price,
+      category: service.category,
+      icon: service.icon,
+      is_active: service.is_active,
+      created_at: service.created_at,
+      updated_at: service.updated_at
+    }));
+
+    res.json({ services: transformedServices });
+  } catch (error) {
+    console.error("Get services error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// CREATE Service
+router.post("/services", auth, async (req, res) => {
+  try {
+    if (req.userRole !== "Admin") {
+      return res.status(403).json({ message: "Only admins can access this endpoint" });
+    }
+
+    console.log(req.body);
+    const { service_name, description, category, icon } = req.body;
+
+    if (!service_name) {
+      return res.status(400).json({ message: "Service name is required" });
+    }
+
+    const service = new Service({
+      service_name,
+      description,
+      category: category || 'Legal Service',
+      icon: icon || 'Gavel'
+    });
+console.log(service);
+
+    await service.save();
+
+    const transformedService = {
+      id: service._id,
+      service_name: service.service_name,
+      description: service.description,
+      price: service.price,
+      category: service.category,
+      icon: service.icon,
+      is_active: service.is_active,
+      created_at: service.created_at,
+      updated_at: service.updated_at
+    };
+
+    res.status(201).json({
+      message: "Service created successfully",
+      service: transformedService
+    });
+  } catch (error) {
+    console.error("Create service error:", error);
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Service name already exists" });
+    }
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// UPDATE Service
+router.put("/services/:id", auth, async (req, res) => {
+  try {
+    if (req.userRole !== "Admin") {
+      return res.status(403).json({ message: "Only admins can access this endpoint" });
+    }
+
+    const { id } = req.params;
+    const { service_name, description, category, icon } = req.body;
+
+    if (!service_name) {
+      return res.status(400).json({ message: "Service name is required" });
+    }
+
+    const service = await Service.findByIdAndUpdate(
+      id,
+      {
+        service_name,
+        description,
+        category: category || 'Legal Service',
+        icon: icon || 'Gavel',
+        updated_at: new Date()
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!service) {
+      return res.status(404).json({ message: "Service not found" });
+    }
+
+    const transformedService = {
+      id: service._id,
+      service_name: service.service_name,
+      description: service.description,
+      price: service.price,
+      category: service.category,
+      icon: service.icon,
+      is_active: service.is_active,
+      created_at: service.created_at,
+      updated_at: service.updated_at
+    };
+
+    res.json({
+      message: "Service updated successfully",
+      service: transformedService
+    });
+  } catch (error) {
+    console.error("Update service error:", error);
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Service name already exists" });
+    }
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// DELETE Service (Soft delete - set is_active to false)
+router.delete("/services/:id", auth, async (req, res) => {
+  try {
+    if (req.userRole !== "Admin") {
+      return res.status(403).json({ message: "Only admins can access this endpoint" });
+    }
+
+    const { id } = req.params;
+
+    const service = await Service.findByIdAndUpdate(
+      id,
+      { is_active: false, updated_at: new Date() },
+      { new: true }
+    );
+
+    if (!service) {
+      return res.status(404).json({ message: "Service not found" });
+    }
+
+    res.json({ message: "Service deleted successfully" });
+  } catch (error) {
+    console.error("Delete service error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });

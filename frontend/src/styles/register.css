@@ -18,6 +18,17 @@
   box-shadow: 0 10px 30px rgba(16, 9, 29, 0.2);
   width: 100%;
   max-width: 480px;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+  font-weight: 500;
+}
+
+.register-form {
   transition: transform 0.3s ease;
 }
 

@@ -4,7 +4,7 @@ import "../styles/doctorDetailsForm.css";
 import "../styles/variables.css";
 import { API } from "../config/api";
 
-const DoctorDetailsForm = () => {
+const AttorneyDetailsForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const userId = location.state?.userId || "";  //  yaha userId milega
@@ -35,7 +35,7 @@ const DoctorDetailsForm = () => {
     }
 
     try {
-      const res = await fetch(API.DOCTORDETAIL, {
+      const res = await fetch(API. ATTORNEY_DETAILS, {
         method: "POST",
         body: data
       });
@@ -89,4 +89,4 @@ const DoctorDetailsForm = () => {
   );
 };
 
-export default DoctorDetailsForm;
+export default AttorneyDetailsForm;

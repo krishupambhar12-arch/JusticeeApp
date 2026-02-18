@@ -7,7 +7,7 @@ import { API } from "../config/api";
 const AttorneyDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [doctorName, setDoctorName] = useState("Attorney");
+  const [attorneyName, setAttorneyName] = useState("Attorney");
   const [todayAppointments, setTodayAppointments] = useState(0);
   const [totalPatients, setTotalPatients] = useState(0);
   const [upcomingAppointments, setUpcomingAppointments] = useState(0);
@@ -23,13 +23,13 @@ const AttorneyDashboard = () => {
 
     const fetchDashboard = async () => {
       try {
-        const res = await fetch(API.DOCTOR_DASHBOARD, {
+        const res = await fetch(API.ATTORNEY_DASHBOARD, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to load");
 
-        setDoctorName(data?.doctor?.name || "Attorney");
+        setAttorneyName(data?.attorney?.name || "Attorney");
         setTodayAppointments(data?.stats?.todayAppointments || 0);
         setTotalPatients(data?.stats?.totalPatients || 0);
         setUpcomingAppointments(data?.stats?.upcomingAppointments || 0);
@@ -61,7 +61,7 @@ const AttorneyDashboard = () => {
             </>
           ) : (
             <>
-              <h1>Welcome Attorney {doctorName} 👋</h1>
+              <h1>Welcome Attorney {attorneyName} 👋</h1>
               <p>You have {todayAppointments} appointments today.</p>
             </>
           )}

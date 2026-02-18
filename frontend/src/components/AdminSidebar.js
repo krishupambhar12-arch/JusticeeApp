@@ -26,7 +26,7 @@ const AdminSidebar = () => {
         <li><Link to="/admin/appointments">Appointments</Link></li>
         <li><Link to="/admin/users">Clients</Link></li>
         <li><Link to="/admin/doctors">Attorneys</Link></li>
-        <li><Link to="/admin/lab-tests">Lab Tests</Link></li>
+        <li><Link to="/admin/services">Services</Link></li>
         <li><Link to="/admin/lab-test-bookings">Lab Test Bookings</Link></li>
         <li><Link to="/admin/consultations">Consultations</Link></li>
         <li><Link to="/admin/feedback">Feedback</Link></li>

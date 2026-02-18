@@ -10,6 +10,7 @@ const userRoute = require("./routes/userRoutes");
 const attorneyRoute = require("./routes/doctor"); // attorney routes
 const adminRoute = require("./routes/admin");
 const aiAdvisorRoute = require("./routes/aiAdvisor");
+const servicesRoute = require("./routes/services");
 
 app.use(express.json())
 app.use(cors());
@@ -17,7 +18,7 @@ app.use(cors());
 // Log only API route path for backend calls
 app.use((req, res, next) => {
     const url = req.originalUrl || req.url
-    if (url.startsWith('/user') || url.startsWith('/attorney') || url.startsWith('/admin')) {
+    if (url.startsWith('/user') || url.startsWith('/attorney') || url.startsWith('/admin') || url.startsWith('/services')) {
         console.log(url)
     }
     next()
@@ -35,6 +36,7 @@ app.use('/user', userRoute);
 app.use('/attorney', attorneyRoute);
 
 app.use('/admin', adminRoute);
+app.use('/services', servicesRoute);
 app.use('/ai', aiAdvisorRoute);
 
 dbConnect();

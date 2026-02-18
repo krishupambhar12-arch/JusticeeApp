@@ -21,7 +21,7 @@ import AdminAppointments from "./pages/AdminAppointments";
 import AdminPatients from "./pages/AdminPatients";
 import AdminDoctors from "./pages/AdminDoctors";
 import AdminFeedback from "./pages/AdminFeedback";
-import AdminLabTests from "./pages/AdminLabTests";
+import AdminServices from "./pages/AdminServices";
 import AdminLabTestBookings from "./pages/AdminLabTestBookings";
 import ClientConsultation from "./pages/ClientConsultation";
 import AttorneyConsultation from "./pages/AttorneyConsultation";
@@ -32,6 +32,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import LabTestListing from "./pages/LabTestListing";
 import BookLabTest from "./pages/BookLabTest";
 import ClientLabTests from "./pages/ClientLabTests";
+import Services from "./pages/Services";
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
         <Route path="/client/feedback" element={<ClientFeedback/>} />
         <Route path="/client/lab-tests" element={<ClientLabTests/>} />
         <Route path="/client/consultation" element={<ClientConsultation/>} />
+        <Route path="/services" element={<Services/>} />
         <Route path="/lab-tests" element={<LabTestListing/>} />
         <Route path="/book-lab-test/:testId" element={<BookLabTest/>} />
         <Route path="/about" element={<About/>} />
@@ -64,7 +66,7 @@ function App() {
         <Route path="/admin/users" element={<AdminPatients/>} />
         <Route path="/admin/doctors" element={<AdminDoctors/>} />
         <Route path="/admin/feedback" element={<AdminFeedback/>} />
-        <Route path="/admin/lab-tests" element={<AdminLabTests/>} />
+        <Route path="/admin/services" element={<AdminServices/>} />
         <Route path="/admin/lab-test-bookings" element={<AdminLabTestBookings/>} />
         <Route path="/admin/consultations" element={<AdminConsultations/>} />
         <Route path="/ai-advisor" element={<AIAdvisor/>} />

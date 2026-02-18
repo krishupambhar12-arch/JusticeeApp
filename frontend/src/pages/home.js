@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import { useNavigate } from "react-router-dom";
+import { API } from "../config/api";
+import ServiceIcon from "../components/ServiceIcon";
 import "../styles/home.css";
+import "../styles/services.css";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -20,7 +23,27 @@ const Home = () => {
   };
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [services, setServices] = useState([]);
+  const [servicesLoading, setServicesLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch(API.ALL_SERVICES);
+      const data = await response.json();
+      if (response.ok) {
+        setServices(data.services || []);
+      }
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    } finally {
+      setServicesLoading(false);
+    }
+  };
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -100,8 +123,8 @@ const Home = () => {
         </div>
 
         <div className="card">
-          <p>Find Attorney</p>
-          <button className="book-btn" onClick={() => handleBookNow("labtest")}>Find Now</button>
+          <p>Legal Services</p>
+          <button className="book-btn" onClick={() => navigate("/services")}>View Services</button>
         </div>
 
         <div className="card ai-card" onClick={() => navigate("/ai-advisor")}>
@@ -110,29 +133,30 @@ const Home = () => {
           <button className="book-btn">Chat Now</button>
         </div>
       </div>
-      {/* Specialities */}
-      <h2>Our Services</h2>
-      <div className="specialities">
-        <div className="speciality" onClick={() => handleSpecialtyClick("Civil Law")}>
-          <img src="/images/banner/civil.png" alt="Civil Law" />
-          <span>Civil Law</span>
-          <button className="book-btn">Find Attorneys</button>
-        </div>
-        <div className="speciality" onClick={() => handleSpecialtyClick("Corporate Law")}>
-          <img src="/images/banner/corporat" alt="Corporate Law" />
-          <span>Corporate Law</span>
-          <button className="book-btn">Find Attorneys</button>
-        </div>
-        <div className="speciality" onClick={() => handleSpecialtyClick("Family Law")}>
-          <img src="/images/banner/family.jpg" alt="Family Law" />
-          <span>Family Law</span>
-          <button className="book-btn">Find Attorneys</button>
-        </div>
-        <div className="speciality" onClick={() => handleSpecialtyClick("Criminal Law")}>
-          <img src="/images/banner/criminal" alt="Criminal Law" />
-          <span>Criminal Law</span>
-          <button className="book-btn">Find Attorneys</button>
-        </div>
+      {/* Dynamic Services */}
+      <h2>Our Legal Services</h2>
+      <div className="services">
+        {servicesLoading ? (
+          <div className="loading">Loading services...</div>
+        ) : services.length > 0 ? (
+          services.map((service) => (
+            <div key={service.id} className="service-card" onClick={() => navigate('/attorneys')}>
+              <div className="service-icon">
+                <ServiceIcon 
+                  iconName={service.icon || 'Gavel'} 
+                  size={48} 
+                />
+              </div>
+              <h3>{service.service_name}</h3>
+              <p>{service.description || 'Professional legal service'}</p>
+              <button className="book-btn">Book Now</button>
+            </div>
+          ))
+        ) : (
+          <div className="no-services">
+            <p>No services available at the moment.</p>
+          </div>
+        )}
       </div>
 
       {/* Client Success Stories */}
