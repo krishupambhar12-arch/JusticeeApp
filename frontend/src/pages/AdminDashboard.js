@@ -87,9 +87,6 @@ const AdminDashboard = () => {
             {adminInfo?.name && (
               <div className="admin-info">
                 <p>Welcome, <strong>{adminInfo.name}</strong></p>
-                {Array.isArray(adminInfo.permissions) && adminInfo.permissions.length > 0 && (
-                  <p className="permissions">Permissions: {adminInfo.permissions.join(', ')}</p>
-                )}
               </div>
             )}
           </div>

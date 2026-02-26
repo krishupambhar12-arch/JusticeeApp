@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Service Icons</title>
+</head>
+<body>
+    <h1>Test Service Icons Display</h1>
+    
+    <h2>Criminal Law Icon Test:</h2>
+    <img src="http://localhost:5000/uploads/service-icons/service-icon-1772116060421-179534010.jpg" 
+         alt="Criminal Law Icon" 
+         style="width: 48px; height: 48px; object-fit: contain; border: 1px solid #ccc;"
+         onerror="console.error('Criminal Law icon failed to load'); this.style.background='red';"
+         onload="console.log('Criminal Law icon loaded successfully');">
+    
+    <h2>Civil Law Icon Test:</h2>
+    <img src="http://localhost:5000/uploads/service-icons/service-icon-1771864551936-881080172.png" 
+         alt="Civil Law Icon" 
+         style="width: 48px; height: 48px; object-fit: contain; border: 1px solid #ccc;"
+         onerror="console.error('Civil Law icon failed to load'); this.style.background='red';"
+         onload="console.log('Civil Law icon loaded successfully');">
+    
+    <h2>Family Law Icon Test:</h2>
+    <img src="http://localhost:5000/uploads/service-icons/service-icon-1772117305322-390135478.jpg" 
+         alt="Family Law Icon" 
+         style="width: 48px; height: 48px; object-fit: contain; border: 1px solid #ccc;"
+         onerror="console.error('Family Law icon failed to load'); this.style.background='red';"
+         onload="console.log('Family Law icon loaded successfully');">
+    
+    <h2>Corporate Icon Test:</h2>
+    <img src="http://localhost:5000/uploads/service-icons/service-icon-1772117288209-61175327.jpg" 
+         alt="Corporate Icon" 
+         style="width: 48px; height: 48px; object-fit: contain; border: 1px solid #ccc;"
+         onerror="console.error('Corporate icon failed to load'); this.style.background='red';"
+         onload="console.log('Corporate icon loaded successfully');">
+
+    <h2>Services API Test:</h2>
+    <button onclick="testServicesAPI()">Test Services API</button>
+    <div id="api-result"></div>
+
+    <script>
+        function testServicesAPI() {
+            fetch('http://localhost:5000/services')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Services API Response:', data);
+                    document.getElementById('api-result').innerHTML = 
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                })
+                .catch(error => {
+                    console.error('API Error:', error);
+                    document.getElementById('api-result').innerHTML = 
+                        'Error: ' + error.message;
+                });
+        }
+    </script>
+</body>
+</html>

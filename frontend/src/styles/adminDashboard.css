@@ -62,7 +62,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* =======================
@@ -86,9 +88,11 @@
 }
 
 .admin-info p {
-  margin: 3px 0;
-  font-size: 14px;
-  color: var(--color-lightest);
+     margin: -29px 0px;
+    font-size: 42px;
+    color: var(--color-lightest);
+    margin-top: 126px;
+
 }
 
 .admin-info strong {
@@ -145,7 +149,7 @@ table {
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
 }
 
 thead {

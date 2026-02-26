@@ -23,8 +23,10 @@ const Services = () => {
     try {
       const response = await fetch(API.ALL_SERVICES);
       const data = await response.json();
+      console.log('Services data received:', data);
       if (response.ok) {
         setServices(data.services || []);
+        console.log('Services set:', data.services);
       }
     } catch (error) {
       console.error("Error fetching services:", error);
@@ -35,7 +37,7 @@ const Services = () => {
 
   const filteredServices = services.filter(service => {
     const matchesSearch = service.service_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = selectedCategory === "all" || service.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -91,26 +93,34 @@ const Services = () => {
         {/* Services Grid */}
         <div className="services">
           {filteredServices.length > 0 ? (
-            filteredServices.map((service) => (
-              <div key={service.id} className="service-card">
-                <div className="service-icon">
-                  <ServiceIcon 
+            filteredServices.map((service) => {
+              console.log('Rendering service:', service);
+              return (
+                <div key={service.id} className="service-card">
+                  <div className="service-icon">
+                    {/* <ServiceIcon 
                     iconName={service.icon || 'Gavel'} 
                     iconFile={service.icon_file}
                     size={48} 
-                  />
+                  /> */}
+                    <ServiceIcon
+                      iconName={service.icon || 'Gavel'}
+                      iconFile={service.icon_file}
+                      size={48}
+                    />
+                  </div>
+                  <h3>{service.service_name}</h3>
+                  <p>{service.description || 'Professional legal service'}</p>
+                  <div className="service-category">{service.category}</div>
+                  <button
+                    className="book-btn"
+                    onClick={() => handleBookService(service)}
+                  >
+                    Book Service
+                  </button>
                 </div>
-                <h3>{service.service_name}</h3>
-                <p>{service.description || 'Professional legal service'}</p>
-                <div className="service-category">{service.category}</div>
-                <button 
-                  className="book-btn"
-                  onClick={() => handleBookService(service)}
-                >
-                  Book Service
-                </button>
-              </div>
-            ))
+              )
+            })
           ) : (
             <div className="no-services">
               <p>No services found matching your criteria.</p>

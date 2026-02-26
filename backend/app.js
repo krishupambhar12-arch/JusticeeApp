@@ -31,7 +31,8 @@ app.use((req, res, next) => {
 //      res.send("Welcome to the Justice App API");
 // })
 
-app.use("/uploads", express.static(Path.join(__dirname,"uploads")));
+app.use('/uploads', express.static('uploads'));
+app.use('/images', express.static(Path.join(__dirname, 'public/images')));
 
 app.use('/user', userRoute);
 

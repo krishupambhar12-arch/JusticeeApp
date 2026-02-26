@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Complete Service Icon Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .service-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .service-card { background: #f9f9f9; padding: 15px; border-radius: 8px; text-align: center; }
+        .service-icon { width: 48px; height: 48px; margin: 0 auto 10px; }
+        .status { padding: 5px 10px; border-radius: 4px; margin: 5px 0; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .loading { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Complete Service Icon Test</h1>
+    
+    <div class="test-section">
+        <h2>📡 API Test</h2>
+        <button onclick="testAPI()">Test Services API</button>
+        <div id="api-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🖼️ Icon Files Test</h2>
+        <div id="icon-test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Service Cards Preview (Like User Site)</h2>
+        <div id="service-cards"></div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '<div class="status loading">Testing API...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:5000/services');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="status success">✅ API Working! Found ${data.services.length} services</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    testIconFiles(data.services);
+                    displayServiceCards(data.services);
+                } else {
+                    resultDiv.innerHTML = `<div class="status error">❌ API Error: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testIconFiles(services) {
+            const resultsDiv = document.getElementById('icon-test-results');
+            resultsDiv.innerHTML = '<h3>Testing Icon Files...</h3>';
+            
+            for (let service of services) {
+                if (service.icon_file) {
+                    const iconUrl = `http://localhost:5000/uploads/service-icons/${service.icon_file}`;
+                    
+                    try {
+                        const response = await fetch(iconUrl, { method: 'HEAD' });
+                        const status = response.ok ? 
+                            `<div class="status success">✅ ${service.service_name} - Icon accessible</div>` :
+                            `<div class="status error">❌ ${service.service_name} - Icon not accessible</div>`;
+                        
+                        resultsDiv.innerHTML += status;
+                    } catch (error) {
+                        resultsDiv.innerHTML += `<div class="status error">❌ ${service.service_name} - Network error</div>`;
+                    }
+                }
+            }
+        }
+
+        function displayServiceCards(services) {
+            const cardsDiv = document.getElementById('service-cards');
+            cardsDiv.innerHTML = '<h3>Service Cards (User Site Preview)</h3><div class="service-grid">';
+            
+            services.forEach(service => {
+                const iconUrl = service.icon_file ? 
+                    `http://localhost:5000/uploads/service-icons/${service.icon_file}` : null;
+                
+                const card = `
+                    <div class="service-card">
+                        <div class="service-icon">
+                            ${iconUrl ? 
+                                `<img src="${iconUrl}" alt="${service.service_name}" style="width:48px;height:48px;object-fit:contain;" 
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                 <div style="width:48px;height:48px;display:none;align-items:center;justify-content:center;background:#f8f9fa;border:2px solid #e9ecef;border-radius:50%;font-size:24px;color:#6c757d;">⚖️</div>` :
+                                `<div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#f8f9fa;border:2px solid #e9ecef;border-radius:50%;font-size:24px;color:#6c757d;">⚖️</div>`
+                            }
+                        </div>
+                        <h4>${service.service_name}</h4>
+                        <p>${service.description || 'Professional legal service'}</p>
+                        <div style="font-size:12px;color:#666;margin-top:10px;">${service.category}</div>
+                    </div>
+                `;
+                cardsDiv.innerHTML += card;
+            });
+            
+            cardsDiv.innerHTML += '</div>';
+        }
+
+        // Auto-test on page load
+        window.onload = () => {
+            testAPI();
+        };
+    </script>
+</body>
+</html>
