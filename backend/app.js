@@ -1,9 +1,12 @@
 const express = require("express")
 const dbConnect = require("./config/dbConnect")
 const app = express()
-const port = 5000;
+const port = process.env.PORT || 5000;
 const cors = require("cors");
 const Path = require("path");
+
+// Load environment variables
+require('dotenv').config();
 
 
 const userRoute = require("./routes/userRoutes");
