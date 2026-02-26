@@ -26,6 +26,10 @@ const serviceSchema = new mongoose.Schema({
     default: 'Gavel',
     required: true
   },
+  icon_file: {
+    type: String,
+    default: null
+  },
   is_active: {
     type: Boolean,
     default: true

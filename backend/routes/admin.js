@@ -11,6 +11,38 @@ const Consultation = require("../models/Consultation");
 const ConsultationMessage = require("../models/ConsultationMessage");
 const Service = require("../models/Service");
 const auth = require("../middleware/auth");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const path = require("path");
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/service-icons/');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'service-icon-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  // Accept only image files
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed'), false);
+  }
+};
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 500 * 1024 * 1024 // 500MB limit
+  }
+});
 
 // ===== TEST ROUTE =====
 router.get("/test", (req, res) => {
@@ -1479,6 +1511,7 @@ router.get("/services", auth, async (req, res) => {
       price: service.price,
       category: service.category,
       icon: service.icon,
+      icon_file: service.icon_file,
       is_active: service.is_active,
       created_at: service.created_at,
       updated_at: service.updated_at
@@ -1492,26 +1525,34 @@ router.get("/services", auth, async (req, res) => {
 });
 
 // CREATE Service
-router.post("/services", auth, async (req, res) => {
+router.post("/services", auth, upload.single('iconFile'), async (req, res) => {
   try {
     if (req.userRole !== "Admin") {
       return res.status(403).json({ message: "Only admins can access this endpoint" });
     }
 
     console.log(req.body);
-    const { service_name, description, category, icon } = req.body;
+    console.log(req.file);
+    const { service_name, description, category } = req.body;
 
     if (!service_name) {
       return res.status(400).json({ message: "Service name is required" });
     }
 
-    const service = new Service({
+    if (!req.file) {
+      return res.status(400).json({ message: "Service icon file is required" });
+    }
+
+    const serviceData = {
       service_name,
       description,
       category: category || 'Legal Service',
-      icon: icon || 'Gavel'
-    });
-console.log(service);
+      icon: 'Custom', // Default icon name for uploaded files
+      icon_file: req.file.filename // Store the uploaded file path
+    };
+
+    const service = new Service(serviceData);
+    console.log(service);
 
     await service.save();
 
@@ -1522,6 +1563,7 @@ console.log(service);
       price: service.price,
       category: service.category,
       icon: service.icon,
+      icon_file: service.icon_file,
       is_active: service.is_active,
       created_at: service.created_at,
       updated_at: service.updated_at
@@ -1541,28 +1583,35 @@ console.log(service);
 });
 
 // UPDATE Service
-router.put("/services/:id", auth, async (req, res) => {
+router.put("/services/:id", auth, upload.single('iconFile'), async (req, res) => {
   try {
     if (req.userRole !== "Admin") {
       return res.status(403).json({ message: "Only admins can access this endpoint" });
     }
 
     const { id } = req.params;
-    const { service_name, description, category, icon } = req.body;
+    const { service_name, description, category } = req.body;
 
     if (!service_name) {
       return res.status(400).json({ message: "Service name is required" });
     }
 
+    const updateData = {
+      service_name,
+      description,
+      category: category || 'Legal Service',
+      icon: 'Custom', // Default icon name for uploaded files
+      updated_at: new Date()
+    };
+
+    // Add icon file path if file was uploaded
+    if (req.file) {
+      updateData.icon_file = req.file.filename;
+    }
+
     const service = await Service.findByIdAndUpdate(
       id,
-      {
-        service_name,
-        description,
-        category: category || 'Legal Service',
-        icon: icon || 'Gavel',
-        updated_at: new Date()
-      },
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -1577,6 +1626,7 @@ router.put("/services/:id", auth, async (req, res) => {
       price: service.price,
       category: service.category,
       icon: service.icon,
+      icon_file: service.icon_file,
       is_active: service.is_active,
       created_at: service.created_at,
       updated_at: service.updated_at
@@ -1617,6 +1667,118 @@ router.delete("/services/:id", auth, async (req, res) => {
     res.json({ message: "Service deleted successfully" });
   } catch (error) {
     console.error("Delete service error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ===== ADMIN LOGIN =====
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // Check if user is admin
+    if (user.role !== "Admin") {
+      return res.status(401).json({ message: "Access denied. Admin privileges required." });
+    }
+
+    // Verify password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // Get admin details
+    const adminDetails = await Admin.findOne({ user_id: user._id })
+      .populate('user_id', 'name email')
+      .lean();
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        id: user._id, 
+        email: user.email, 
+        role: user.role 
+      },
+      process.env.JWT_SECRET || "secretKey",
+      { expiresIn: "24h" }
+    );
+
+    res.json({
+      message: "Admin login successful",
+      token,
+      admin: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        permissions: adminDetails?.permissions || []
+      }
+    });
+  } catch (error) {
+    console.error("Admin login error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ===== CREATE DEFAULT ADMIN (for initial setup) =====
+router.post("/setup-default", async (req, res) => {
+  try {
+    // Check if default admin already exists
+    const existingAdmin = await User.findOne({ email: "admin@gmail.com" });
+    if (existingAdmin) {
+      return res.status(400).json({ message: "Default admin already exists" });
+    }
+
+    // Create default admin user
+    const defaultAdmin = new User({
+      name: "System Administrator",
+      email: "admin@gmail.com",
+      password: "admin123",
+      role: "Admin"
+    });
+
+    await defaultAdmin.save();
+
+    // Create admin record with permissions
+    const adminRecord = new Admin({
+      user_id: defaultAdmin._id,
+      permissions: [
+        "view_appointments",
+        "manage_appointments", 
+        "view_users",
+        "manage_users",
+        "view_doctors",
+        "manage_doctors",
+        "view_feedback",
+        "manage_feedback",
+        "view_services",
+        "manage_services"
+      ]
+    });
+
+    await adminRecord.save();
+
+    res.json({
+      message: "Default admin user created successfully",
+      admin: {
+        email: "admin@gmail.com",
+        password: "admin123",
+        name: "System Administrator"
+      }
+    });
+  } catch (error) {
+    console.error("Create default admin error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });

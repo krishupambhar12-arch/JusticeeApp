@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
      enum: ["Client", "Attorney", "Admin"], 
        default: "Client" 
      },
+     isSocialLogin: { type: Boolean, default: false },
+     profilePicture: { type: String },
+     provider: { type: String }, // 'google', 'facebook', 'linkedin'
+     providerId: { type: String }, // ID from the provider
 });
 
 // ✅ Pre-save hook to hash password

@@ -1,4 +1,4 @@
-/* Services Page Styles */
+/* Services Page Styles - Matching Client Success Stories Box Style */
 .services-page {
   min-height: 80vh;
   padding: 40px 20px;
@@ -71,36 +71,44 @@
   display: inline-block;
 }
 
-/* Services Section Styles */
+/* Services Section - Matching Client Success Stories Box Style */
 .services {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  margin: 32px 0;
-  padding: 0 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 3rem;
+  padding: 0 26rem;
 }
 
 .service-card {
-  background: white;
+  background: #fff;
+  padding: 1rem;
   border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
   text-align: center;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: 2px solid transparent;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: 1;
+  max-width: 327px;
+  margin: 0 auto;
 }
 
 .service-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  border-color: #007bff;
+  transform: scale(1.02);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
 
 .service-icon {
   font-size: 48px;
   margin-bottom: 16px;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1rem auto;
 }
 
 .service-card h3 {
@@ -116,6 +124,11 @@
   line-height: 1.5;
   margin: 0 0 16px 0;
   min-height: 42px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
 }
 
 .service-price {
@@ -126,22 +139,20 @@
 }
 
 .service-card .book-btn {
-  background: linear-gradient(135deg, #007bff, #0056b3);
-  color: white;
+  background: var(--color-regular-purple);
+  color: #fff;
   border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 25px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  width: 100%;
-  margin-top: 16px;
+  transition: background 0.3s ease, transform 0.2s ease;
+  margin-top: auto;
 }
 
 .service-card .book-btn:hover {
-  background: linear-gradient(135deg, #0056b3, #004085);
-  transform: scale(1.02);
+  background: var(--color-dark-purple);
+  transform: translateY(-2px);
 }
 
 .loading {
@@ -164,16 +175,17 @@
   margin: 0;
 }
 
-/* Responsive Design */
+/* Responsive Design - Matching Client Success Stories */
 @media (max-width: 768px) {
   .services {
-    grid-template-columns: 1fr;
-    padding: 0 16px;
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    padding: 0 0.5rem;
   }
   
   .service-card {
-    padding: 20px;
+    padding: 0.8rem;
+    max-width: 500px;
   }
   
   .service-icon {
@@ -191,10 +203,21 @@
 
 @media (max-width: 480px) {
   .services {
-    padding: 0 12px;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    padding: 0;
   }
   
   .service-card {
-    padding: 16px;
+    padding: 0.6rem;
+    max-width: 500px;
+  }
+  
+  .service-icon {
+    font-size: 36px;
+  }
+  
+  .service-card h3 {
+    font-size: 16px;
   }
 }

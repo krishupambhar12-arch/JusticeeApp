@@ -96,6 +96,7 @@ const Services = () => {
                 <div className="service-icon">
                   <ServiceIcon 
                     iconName={service.icon || 'Gavel'} 
+                    iconFile={service.icon_file}
                     size={48} 
                   />
                 </div>

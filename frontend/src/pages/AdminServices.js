@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { API } from '../config/api';
 import AdminSidebar from '../components/AdminSidebar';
-import IconPicker from '../components/IconPicker';
 import ServiceIcon from '../components/ServiceIcon';
 import '../styles/adminServices.css';
-import '../styles/iconPicker.css';
 
 const AdminServices = () => {
   const [services, setServices] = useState([]);
@@ -21,7 +19,7 @@ const AdminServices = () => {
     service_name: '',
     description: '',
     category: 'Legal Service',
-    icon: 'Gavel'
+    iconFile: null
   });
   const [formErrors, setFormErrors] = useState({});
 
@@ -45,6 +43,16 @@ const AdminServices = () => {
       });
       const data = await response.json();
       if (response.ok) {
+        console.log('Services data received:', data.services);
+        // Debug: Check if services have icon_file
+        data.services.forEach((service, index) => {
+          console.log(`Service ${index}:`, {
+            id: service.id,
+            name: service.service_name,
+            icon: service.icon,
+            icon_file: service.icon_file
+          });
+        });
         setServices(data.services || []);
       } else {
         setMessage(data.message || 'Error fetching services');
@@ -70,8 +78,8 @@ const AdminServices = () => {
       errors.description = 'Description cannot exceed 500 characters';
     }
     
-    if (!formData.icon) {
-      errors.icon = 'Please select an icon';
+    if (!formData.iconFile) {
+      errors.iconFile = 'Service icon file is required';
     }
     
     setFormErrors(errors);
@@ -85,6 +93,24 @@ const AdminServices = () => {
     });
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setFormErrors({ ...formErrors, iconFile: 'Only image files are allowed' });
+        return;
+      }
+      // Validate file size (500MB)
+      if (file.size > 500 * 1024 * 1024) {
+        setFormErrors({ ...formErrors, iconFile: 'File size must be less than 500MB' });
+        return;
+      }
+      setFormData({ ...formData, iconFile: file });
+      setFormErrors({ ...formErrors, iconFile: null });
+    }
+  };
+
   const handleAddService = async (e) => {
     e.preventDefault();
     
@@ -95,13 +121,22 @@ const AdminServices = () => {
 
     setActionLoading(prev => ({ ...prev, creating: true }));
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('service_name', formData.service_name);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('icon', 'Custom'); // Default icon name for uploaded files
+      
+      if (formData.iconFile) {
+        formDataToSend.append('iconFile', formData.iconFile);
+      }
+
       const response = await fetch(API.ADMIN_CREATE_SERVICE, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: formDataToSend
       });
       
       const data = await response.json();
@@ -112,7 +147,7 @@ const AdminServices = () => {
           service_name: '',
           description: '',
           category: 'Legal Service',
-          icon: 'Gavel'
+          iconFile: null
         });
         fetchServices();
       } else {
@@ -131,7 +166,7 @@ const AdminServices = () => {
       service_name: service.service_name,
       description: service.description || '',
       category: service.category || 'Legal Service',
-      icon: service.icon || 'Gavel'
+      iconFile: null
     });
     setShowAddModal(true);
   };
@@ -146,13 +181,22 @@ const AdminServices = () => {
 
     setActionLoading(prev => ({ ...prev, updating: true }));
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('service_name', formData.service_name);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('icon', 'Custom'); // Default icon name for uploaded files
+      
+      if (formData.iconFile) {
+        formDataToSend.append('iconFile', formData.iconFile);
+      }
+
       const response = await fetch(`${API.ADMIN_UPDATE_SERVICE}/${editingService.id}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: formDataToSend
       });
       
       const data = await response.json();
@@ -164,7 +208,7 @@ const AdminServices = () => {
           service_name: '',
           description: '',
           category: 'Legal Service',
-          icon: 'Gavel'
+          iconFile: null
         });
         fetchServices();
       } else {
@@ -211,7 +255,7 @@ const AdminServices = () => {
       service_name: '',
       description: '',
       category: 'Legal Service',
-      icon: 'Gavel'
+      iconFile: null
     });
   };
 
@@ -257,6 +301,7 @@ const AdminServices = () => {
                       <td>
                         <ServiceIcon 
                           iconName={service.icon || 'Gavel'} 
+                          iconFile={service.icon_file}
                           size={20} 
                           className="table-icon"
                         />
@@ -346,13 +391,38 @@ const AdminServices = () => {
                     ))}
                   </select>
                 </div>
-                <IconPicker
-                  selectedIcon={formData.icon}
-                  onIconSelect={(icon) => setFormData({...formData, icon})}
-                />
-                {formErrors.icon && (
-                  <span className="error-message">{formErrors.icon}</span>
-                )}
+                <div className="form-group">
+                  <label htmlFor="iconFile">Service Icon (Upload Custom Icon) *</label>
+                  <input
+                    type="file"
+                    id="iconFile"
+                    name="iconFile"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className={formErrors.iconFile ? 'error' : ''}
+                    required
+                  />
+                  <small>Supported formats: JPG, PNG, GIF. Max size: 500MB</small>
+                  {formErrors.iconFile && (
+                    <span className="error-message">{formErrors.iconFile}</span>
+                  )}
+                  {formData.iconFile && (
+                    <div style={{ marginTop: '10px' }}>
+                      <strong>Preview:</strong><br />
+                      <img 
+                        src={URL.createObjectURL(formData.iconFile)} 
+                        alt="Icon preview" 
+                        style={{ 
+                          width: '50px', 
+                          height: '50px', 
+                          objectFit: 'cover',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
                 <div className="modal-actions">
                   <button
                     type="button"

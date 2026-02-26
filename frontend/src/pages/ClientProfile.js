@@ -10,6 +10,8 @@ const ClientProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
 
   const [patient, setPatient] = useState({
     name: "",
@@ -59,6 +61,49 @@ const ClientProfile = () => {
     setPatient({ ...patient, [name]: value });
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImage(file);
+      setImagePreview(URL.createObjectURL(file));
+      // Show success message for image upload
+      setError("✅ Image uploaded successfully! Click Continue to proceed.");
+      setTimeout(() => setError(""), 3000);
+    }
+  };
+
+  const handleContinue = () => {
+    // Check if this is running in a popup window
+    console.log('Window opener:', window.opener);
+    console.log('Window opener closed:', window.opener?.closed);
+    
+    if (window.opener && !window.opener.closed) {
+      console.log('Detected popup window, transferring auth data and closing...');
+      
+      // Copy authentication data to parent window if needed
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('role');
+      const user = localStorage.getItem('user');
+      
+      if (token && window.opener.localStorage) {
+        window.opener.localStorage.setItem('token', token);
+        window.opener.localStorage.setItem('role', role);
+        if (user) {
+          window.opener.localStorage.setItem('user', user);
+        }
+        console.log('Auth data transferred to parent window');
+      }
+      
+      // Redirect the main parent window and close the popup
+      window.opener.location.href = "http://localhost:3000/client/dashboard";
+      window.close();
+    } else {
+      console.log('Not a popup window or opener is closed, using normal navigation');
+      // Fallback for cases where window.opener is not available (e.g., if not opened as a popup)
+      navigate("/client/dashboard");
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -102,11 +147,36 @@ const ClientProfile = () => {
             </>
           ) : error ? (
             <>
-              <h2>Error</h2>
-              <p className="role-text" style={{ color: '#dc3545' }}>{error}</p>
+              <h2>{error.includes('✅') ? 'Success' : 'Error'}</h2>
+              <p className={`role-text ${error.includes('✅') ? 'success-message' : 'error-message'}`}>
+                {error}
+              </p>
             </>
           ) : (
             <>
+              {/* Profile Image Upload */}
+              <div className="profile-image-section">
+                <div className="profile-image-container">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Profile" className="profile-image" />
+                  ) : (
+                    <div className="profile-image-placeholder">
+                      {patient.name ? patient.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  id="profileImage"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  style={{ display: 'none' }}
+                />
+                <label htmlFor="profileImage" className="upload-image-btn">
+                  Upload Photo
+                </label>
+              </div>
+
               {edit ? (
                 <input
                   type="text"
@@ -124,14 +194,23 @@ const ClientProfile = () => {
             </>
           )}
 
-          <button className="edit-btn" onClick={() => setEdit(!edit)}>
-            {edit ? "Cancel" : "Edit Profile"}
-          </button>
-          {edit && (
-            <button className="save-btn" onClick={handleSave} disabled={saving}>
-              {saving ? "Saving..." : "Save Changes"}
+          <div className="profile-actions">
+            <button className="edit-btn" onClick={() => setEdit(!edit)}>
+              {edit ? "Cancel" : "Edit Profile"}
             </button>
-          )}
+            {edit && (
+              <button className="save-btn" onClick={handleSave} disabled={saving}>
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+            )}
+            <button
+              className="continue-btn"
+              onClick={handleContinue}
+            >
+              Continue
+            </button>
+          </div>
+          
           <button
             className="forgot-password-btn"
             onClick={() => navigate("/forgot-password")}

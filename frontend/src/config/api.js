@@ -21,6 +21,7 @@ export const API = {
   SUBMIT_FEEDBACK: `${BASE_URL}/user/feedback`,
   GET_USER_FEEDBACK: `${BASE_URL}/user/feedback`,
   // Admin APIs
+  ADMIN_LOGIN: `${BASE_URL}/admin/login`,
   ADMIN_DASHBOARD: `${BASE_URL}/admin/dashboard`,
   ADMIN_APPOINTMENTS: `${BASE_URL}/admin/appointments`,
   ADMIN_UPDATE_APPOINTMENT_STATUS: `${BASE_URL}/admin/appointments`,
