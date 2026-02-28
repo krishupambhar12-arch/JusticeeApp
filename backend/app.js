@@ -1,0 +1,48 @@
+const express = require("express")
+const dbConnect = require("./config/dbConnect")
+const app = express()
+const port = process.env.PORT || 5000;
+const cors = require("cors");
+const Path = require("path");
+
+// Load environment variables
+require('dotenv').config();
+
+
+const userRoute = require("./routes/userRoutes");
+const attorneyRoute = require("./routes/doctor"); // attorney routes
+const adminRoute = require("./routes/admin");
+const aiAdvisorRoute = require("./routes/aiAdvisor");
+const servicesRoute = require("./routes/services");
+
+app.use(express.json())
+app.use(cors());
+
+// Log only API route path for backend calls
+app.use((req, res, next) => {
+    const url = req.originalUrl || req.url
+    if (url.startsWith('/user') || url.startsWith('/attorney') || url.startsWith('/admin') || url.startsWith('/services')) {
+        console.log(url)
+    }
+    next()
+})
+
+// app.use("/", (req, res) => {
+//      res.send("Welcome to the Justice App API");
+// })
+
+app.use('/uploads', express.static('uploads'));
+app.use('/images', express.static(Path.join(__dirname, 'public/images')));
+
+app.use('/user', userRoute);
+
+// Attorney routes
+app.use('/attorney', attorneyRoute);
+
+app.use('/admin', adminRoute);
+app.use('/services', servicesRoute);
+app.use('/ai', aiAdvisorRoute);
+
+dbConnect();
+
+app.listen(port);
