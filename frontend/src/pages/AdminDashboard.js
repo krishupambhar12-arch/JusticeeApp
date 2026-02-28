@@ -23,7 +23,7 @@ const AdminDashboard = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        // console.log('Dashboard data received:', data); // Debug log
+        // console.log('Dashboard data received:', data); // Debug log        
         setStats(data.stats);
         setAdminInfo(data.admin || {});
         setAppointments(data.recentAppointments || []);
