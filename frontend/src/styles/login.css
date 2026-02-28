@@ -15,7 +15,7 @@
 .login-content-wrapper {
   display: flex;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1135px;
   background: white;
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(92, 71, 80, 0.2);
@@ -58,7 +58,7 @@
 
 /* Left Side Box - Website Information */
 .login-left-box {
-  flex: 1;
+  flex: 0 0 500px;
   background: linear-gradient(135deg, #5c4750, #4a3a42);
   color: white;
   padding: 50px 40px;
@@ -103,6 +103,33 @@
 
 .features-section {
   margin-bottom: 30px;
+}
+
+/* Bullet Points Section */
+.bullet-points {
+  margin-bottom: 25px;
+}
+
+.bullet-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.bullet-icon {
+  color: #4ade80;
+  font-weight: bold;
+  font-size: 16px;
+  margin-right: 12px;
+  width: 20px;
+  text-align: center;
+}
+
+.bullet-item span {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .features-section h3 {

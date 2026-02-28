@@ -244,6 +244,7 @@ const Login = () => {
           
           <div className="features-section">
             <h3>Why Choose Justice Point?</h3>
+            <div>
             <div className="feature-item">
               <div className="feature-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -252,7 +253,7 @@ const Login = () => {
               </div>
               <div className="feature-text">
                 <h4>Verified Attorneys</h4>
-                <p>Connect with experienced and verified legal professionals</p>
+                {/* <p>Connect with experienced and verified legal professionals</p> */}
               </div>
             </div>
             
@@ -264,7 +265,21 @@ const Login = () => {
               </div>
               <div className="feature-text">
                 <h4>Secure & Confidential</h4>
-                <p>Your legal matters are handled with complete privacy</p>
+                {/* <p>Your legal matters are handled with complete privacy</p> */}
+              </div>
+            </div>
+            
+            <div className="feature-item">
+              <div className="feature-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M12 6v6l4 4"/>
+
+                </svg>
+              </div>
+              <div className="feature-text">
+                <h4>24/7 client support</h4>
+                {/* <p>Round-the-clock assistance whenever you need it</p> */}
               </div>
             </div>
             
@@ -276,11 +291,14 @@ const Login = () => {
               </div>
               <div className="feature-text">
                 <h4>Quick Solutions</h4>
-                <p>Fast and efficient legal assistance when you need it</p>
+                {/* <p>Fast and efficient legal assistance when you need it</p> */}
               </div>
             </div>
+            </div>  
           </div>
           
+          
+
           <div className="testimonials-section">
             <div className="testimonial">
               <div className="testimonial-text">
