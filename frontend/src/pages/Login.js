@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "../styles/login.css"; // your existing CSS
 import "../styles/variables.css";
 import { API } from "../config/api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -228,6 +228,15 @@ const Login = () => {
       <div className="login-content-wrapper">
         {/* Left Side Box - Website Information */}
         <div className="login-left-box">
+          {/* Home Arrow Button */}
+          <Link to="/" className="home-arrow-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M10 19l-7-7m0 0l7-7m0 0"/>
+              <path d="M3 12h18"/>
+            </svg>
+            {/* <span>Home</span> */}
+          </Link>
+          
           <div className="brand-section">
             <h1 className="brand-name">Justice Point</h1>
             <p className="brand-tagline">Your Trusted Legal Partner</p>
