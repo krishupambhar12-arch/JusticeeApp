@@ -11,12 +11,7 @@ const Register = () => {
     name: "",
     email: "",
     password: "",
-    confirmPassword: "",
-    gender: "",
-    phone: "",
-    address: "",
-    dob: "",
-    role: ""
+    confirmPassword: ""
   });
 
   const [errors, setErrors] = useState({});
@@ -67,7 +62,7 @@ const Register = () => {
         default:
           return;
       }
-      
+
       // Open popup for OAuth
       const popup = window.open(
         authUrl,
@@ -78,15 +73,19 @@ const Register = () => {
       // Listen for messages from popup
       const messageHandler = async (event) => {
         if (event.origin !== window.location.origin) return;
-        
+
         if (event.data.type === 'social-auth-success') {
           popup.close();
           window.removeEventListener('message', messageHandler);
-          
+
           // Save token and role
           localStorage.setItem('token', event.data.token);
           localStorage.setItem('role', event.data.user.role);
-          
+
+          // Show success alert with user name
+          const userName = event.data.user.name || event.data.user.email;
+          alert(`🎉 Welcome, ${userName}! Registration successful.`);
+
           // Navigate based on role
           if (event.data.user.role === 'Attorney') {
             navigate('/attorney/dashboard');
@@ -106,7 +105,7 @@ const Register = () => {
       };
 
       window.addEventListener('message', messageHandler);
-      
+
       // Check if popup was blocked
       const checkClosed = setInterval(() => {
         if (popup.closed) {
@@ -114,7 +113,7 @@ const Register = () => {
           window.removeEventListener('message', messageHandler);
         }
       }, 1000);
-      
+
     } catch (error) {
       console.error('Social login error:', error);
       alert('Social login failed. Please try again.');
@@ -123,49 +122,29 @@ const Register = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    } else if (formData.name.length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
+      newErrors.name = "Full name is required";
     }
-    
+
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = "Email is invalid";
     }
-    
-    if (!formData.password.trim()) {
-      newErrors.password = 'Password is required';
+
+    if (!formData.password) {
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = "Password must be at least 6 characters";
     }
-    
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password";
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
     }
-    
-    if (!formData.gender) {
-      newErrors.gender = 'Gender is required';
-    }
-    
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone is required';
-    }
-    
-    if (!formData.address.trim()) {
-      newErrors.address = 'Address is required';
-    }
-    
-    if (!formData.dob) {
-      newErrors.dob = 'Date of birth is required';
-    }
-    
-    if (!formData.role) {
-      newErrors.role = 'Role is required';
-    }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -179,39 +158,36 @@ const Register = () => {
 
     setLoading(true);
     setMessage("");
-    
-    console.log('Registration attempt with:', { ...formData, password: '***', confirmPassword: '***' });
-    
+
     try {
+      // Add role as Client for regular registration
+      const registrationData = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        role: "Client"
+      };
+
       const res = await fetch(API.REGISTER, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(formData)
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(registrationData),
       });
-      
-      console.log('Registration response status:', res.status);
+
       const data = await res.json();
-      console.log('Registration response data:', data);
       
       if (res.ok) {
-        setMessage("✅ Signup Successful! Redirecting...");
+        setMessage("✅ Registration successful! Redirecting...");
         
-        // Delay navigation to show success message
+        // token & role save
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.user.role);
+        
+        // Navigate to client dashboard
         setTimeout(() => {
-          if(formData.role === "Attorney") {
-            console.log('Navigating to attorney details form');
-            navigate("/attorney/details", { 
-              state: { 
-                userId: data.user.id,
-                userName: data.user.name 
-              } 
-            });
-          } else {
-            console.log('Navigating to client dashboard');
-            navigate("/client/dashboard");
-          }
+          console.log('Navigating to client dashboard');
+          navigate("/client/dashboard");
         }, 1500);
       } else {
         setMessage(data.message || "❌ Registration failed");
@@ -289,7 +265,7 @@ const Register = () => {
                 </svg>
               ) : (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8-11-8z"/>
                   <circle cx="12" cy="12" r="3"/>
                 </svg>
               )}
@@ -324,7 +300,7 @@ const Register = () => {
                 </svg>
               ) : (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8-11-8z"/>
                   <circle cx="12" cy="12" r="3"/>
                 </svg>
               )}
@@ -332,96 +308,6 @@ const Register = () => {
           </div>
           {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
         </div>
-        
-        <div className="form-group">
-          <label>Gender</label>
-          <div className="gender-options">
-            <label>
-              <input
-                type="radio"
-                name="gender"
-                value="Male"
-                checked={formData.gender === "Male"}
-                onChange={handleChange}
-              /> Male
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="gender"
-                value="Female"
-                checked={formData.gender === "Female"}
-                onChange={handleChange}
-              /> Female
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="gender"
-                value="Other"
-                checked={formData.gender === "Other"}
-                onChange={handleChange}
-              /> Other
-            </label>
-          </div>
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="phone">Phone</label>
-          <input
-            type="tel"
-            id="phone"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            placeholder="Enter your phone number"
-            required
-          />
-          {errors.phone && <span className="error-message">{errors.phone}</span>}
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="address">Address</label>
-          <textarea
-            id="address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            placeholder="Enter your address"
-            rows="3"
-            required
-          />
-          {errors.address && <span className="error-message">{errors.address}</span>}
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="dob">Date of Birth</label>
-          <input
-            type="date"
-            id="dob"
-            name="dob"
-            value={formData.dob}
-            onChange={handleChange}
-            required
-          />
-          {errors.dob && <span className="error-message">{errors.dob}</span>}
-        </div>
-        
-        {/* <div className="form-group">
-          <label htmlFor="role">Role</label>
-          <select
-            id="role"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select Role</option>
-            <option value="Client">Client</option>
-            <option value="Attorney">Attorney</option>
-            {/* <option value="Admin">Admin</option> }
-          </select>
-        </div> */}
         
         <button type="submit" className="register-button" disabled={loading}>
           {loading ? 'Please wait...' : 'Sign Up'}
@@ -463,16 +349,16 @@ const Register = () => {
             onClick={() => handleSocialLogin('linkedin')}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="#0077B5">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.064-2.063zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
             </svg>
             LinkedIn
           </button>
         </div>
+
+        <div className="login-link">
+          Already have an account? <a href="/login">Login</a>
+        </div>
       </form>
-      
-      <div className="login-redirect">
-        Already have an account? <Link to="/login">Login here</Link>
-      </div>
     </div>
   );
 };
