@@ -225,7 +225,68 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      <form className="login-form" onSubmit={handleSubmit}>
+      <div className="login-content-wrapper">
+        {/* Left Side Box - Website Information */}
+        <div className="login-left-box">
+          <div className="brand-section">
+            <h1 className="brand-name">Justice Point</h1>
+            <p className="brand-tagline">Your Trusted Legal Partner</p>
+          </div>
+          
+          <div className="features-section">
+            <h3>Why Choose Justice Point?</h3>
+            <div className="feature-item">
+              <div className="feature-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div className="feature-text">
+                <h4>Verified Attorneys</h4>
+                <p>Connect with experienced and verified legal professionals</p>
+              </div>
+            </div>
+            
+            <div className="feature-item">
+              <div className="feature-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+              </div>
+              <div className="feature-text">
+                <h4>Secure & Confidential</h4>
+                <p>Your legal matters are handled with complete privacy</p>
+              </div>
+            </div>
+            
+            <div className="feature-item">
+              <div className="feature-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+              </div>
+              <div className="feature-text">
+                <h4>Quick Solutions</h4>
+                <p>Fast and efficient legal assistance when you need it</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="testimonials-section">
+            <div className="testimonial">
+              <div className="testimonial-text">
+                Your Case, Our Commitment
+              </div>
+              <div className="testimonial-author">
+                <div className="author-name">Justice Point</div>
+                <div className="author-title">Legal Excellence</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side - Login Form */}
+        <form className="login-form" onSubmit={handleSubmit}>
         <h2>Login</h2>
 
         {message && (
@@ -334,7 +395,8 @@ const Login = () => {
         <div className="register-link">
           Don't have an account? <a href="/register">Register</a>
         </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };
