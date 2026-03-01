@@ -152,6 +152,16 @@ const Login = () => {
       });
 
       console.log('Login response status:', res.status);
+      console.log('Login response headers:', res.headers.get('content-type'));
+
+      // Check if response is JSON, otherwise handle as HTML error
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await res.text();
+        console.error('Received non-JSON response:', text);
+        throw new Error('Server returned an error. Please try again later.');
+      }
+
       const data = await res.json();
       console.log('Login response data:', data);
 
@@ -194,19 +204,38 @@ const Login = () => {
       
       // token & role save
       localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.user.role);
-      console.log('Saved to localStorage:', { token: data.token, role: data.user.role });
+      localStorage.setItem("role", data.user ? data.user.role : data.attorney.role);
+      
+      // Save user name and email for dashboard use
+      const userName = data.user ? data.user.name : data.attorney.name;
+      const userEmail = data.user ? data.user.email : data.attorney.email;
+      
+      if (userName) {
+        localStorage.setItem("name", userName);
+      }
+      if (userEmail) {
+        localStorage.setItem("email", userEmail);
+      }
+      
+      console.log('Saved to localStorage:', { 
+        token: data.token, 
+        role: data.user ? data.user.role : data.attorney.role,
+        name: userName,
+        email: userEmail
+      });
 
       // Delay navigation to show success message
       setTimeout(() => {
         // role wise navigation
-        if (data.user.role === "Attorney") {
+        const userRole = data.user ? data.user.role : data.attorney.role;
+        
+        if (userRole === "Attorney") {
           console.log('Navigating to attorney dashboard');
           navigate("/attorney/dashboard");
-        } else if (data.user.role === "Client") {
+        } else if (userRole === "Client") {
           console.log('Navigating to client dashboard');
           navigate("/client/dashboard");
-        } else if (data.user.role === "Admin") {
+        } else if (userRole === "Admin") {
           console.log('Navigating to admin dashboard');
           navigate("/admin/dashboard");
         } else {
@@ -217,7 +246,13 @@ const Login = () => {
 
     } catch (err) {
       console.error("Login error:", err);
-      setMessage("❌ Something went wrong. Please try again.");
+      if (err.message.includes('Server returned an error')) {
+        setMessage("❌ Server is experiencing issues. Please try again later.");
+      } else if (err.message.includes('Failed to fetch')) {
+        setMessage("❌ Cannot connect to server. Please check your internet connection.");
+      } else {
+        setMessage("❌ " + (err.message || "Something went wrong. Please try again."));
+      }
     } finally {
       setLoading(false);
     }

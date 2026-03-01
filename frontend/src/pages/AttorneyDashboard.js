@@ -15,10 +15,23 @@ const AttorneyDashboard = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    const userEmail = localStorage.getItem("email");
+    
     if (!token) {
       setError("Not authenticated");
       setLoading(false);
       return;
+    }
+
+    // Set attorney name from localStorage if available
+    const savedName = localStorage.getItem("name");
+    if (savedName) {
+      setAttorneyName(savedName);
+    } else if (userEmail) {
+      // Extract name from email or use a default
+      const nameFromEmail = userEmail.split('@')[0];
+      setAttorneyName(nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1));
     }
 
     const fetchDashboard = async () => {
@@ -26,15 +39,29 @@ const AttorneyDashboard = () => {
         const res = await fetch(API.ATTORNEY_DASHBOARD, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        
+        // Check if response is JSON
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await res.text();
+          console.error('Received non-JSON response:', text);
+          throw new Error('Server error. Please try again later.');
+        }
+        
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to load");
 
-        setAttorneyName(data?.attorney?.name || "Attorney");
+        // Update attorney name if available from API
+        if (data?.attorney?.name) {
+          setAttorneyName(data.attorney.name);
+        }
+        
         setTodayAppointments(data?.stats?.todayAppointments || 0);
         setTotalPatients(data?.stats?.totalPatients || 0);
         setUpcomingAppointments(data?.stats?.upcomingAppointments || 0);
         setEarnings(data?.stats?.earnings || 0);
       } catch (e) {
+        console.error("Dashboard error:", e);
         setError(e.message);
       } finally {
         setLoading(false);

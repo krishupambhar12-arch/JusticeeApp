@@ -245,10 +245,10 @@ const AdminPatients = () => {
                 <tr>
                   <th>Name</th>
                   <th>Email</th>
-                  <th>Signup Date</th>
-                  <th>Signup Time</th>
-                  <th>Last Login Date</th>
-                  <th>Last Login Time</th>
+                  <th> Date</th>
+                  {/* <th>Signup Time</th> */}
+                  {/* <th>Last Login Date</th> */}
+                  <th>Time</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -259,8 +259,8 @@ const AdminPatients = () => {
                     <td>{user.name}</td>
                     <td>{user.email}</td>
                     <td>{user.signupDate}</td>
-                    <td>{user.signupTime}</td>
-                    <td>{user.lastLoginDate}</td>
+                    {/* <td>{user.signupTime}</td> */}
+                    {/* <td>{user.lastLoginDate}</td> */}
                     <td>{user.lastLoginTime}</td>
                     <td>
                       <span className={`status-badge ${user.status === 'active' ? 'status-active' : 'status-inactive'}`}>

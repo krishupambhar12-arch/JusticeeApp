@@ -14,6 +14,15 @@ const generateToken = (id, role) => {
   });
 };
 
+// ===== TEST ROUTE =====
+router.get("/test", (req, res) => {
+  res.json({ 
+    message: "User routes are working!",
+    timestamp: new Date().toISOString(),
+    server: "Backend is running correctly"
+  });
+});
+
 // ===== USER REGISTRATION =====
 router.post("/register", async (req, res) => {
   try {
@@ -216,7 +225,14 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("❌ Login error:", error);
     console.error("❌ Error stack:", error.stack);
-    res.status(500).json({ message: "Server error during login" });
+    
+    // Ensure JSON response even on error
+    if (!res.headersSent) {
+      return res.status(500).json({ 
+        message: "Server error during login",
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
   }
 });
 
@@ -242,6 +258,87 @@ router.get("/profile", auth, async (req, res) => {
   } catch (error) {
     console.error("Profile error:", error);
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ===== CLIENT DASHBOARD =====
+router.get("/dashboard", auth, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const userRole = req.userRole;
+
+    console.log("🔍 Client dashboard request:", { userId, userRole });
+
+    // Get user details
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Get user's appointments
+    const appointments = await Appointment.find({ userId })
+      .sort({ date: -1 })
+      .limit(5);
+
+    const upcomingAppointments = appointments.filter(apt => 
+      new Date(apt.date) > new Date() && apt.status !== 'Cancelled'
+    ).length;
+
+    const completedAppointments = appointments.filter(apt => 
+      apt.status === 'Completed'
+    ).length;
+
+    const totalVisits = appointments.length;
+
+    res.json({
+      message: "Dashboard data loaded successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      },
+      stats: {
+        totalVisits,
+        upcomingAppointments,
+        completedAppointments,
+        totalBills: 0 // Can be calculated later
+      },
+      recentAppointments: appointments.map(apt => ({
+        id: apt._id,
+        date: apt.date,
+        time: apt.time,
+        status: apt.status,
+        attorneyName: apt.attorneyName || 'Not assigned'
+      }))
+    });
+  } catch (error) {
+    console.error("❌ Client dashboard error:", error);
+    res.status(500).json({ message: "Failed to load dashboard data" });
+  }
+});
+
+// ===== GET USER APPOINTMENTS =====
+router.get("/appointments", auth, async (req, res) => {
+  try {
+    const userId = req.userId;
+    
+    const appointments = await Appointment.find({ userId })
+      .sort({ date: -1 });
+
+    res.json({
+      appointments: appointments.map(apt => ({
+        id: apt._id,
+        date: apt.date,
+        time: apt.time,
+        status: apt.status,
+        attorneyName: apt.attorneyName || 'Not assigned',
+        notes: apt.notes || ''
+      }))
+    });
+  } catch (error) {
+    console.error("❌ Get appointments error:", error);
+    res.status(500).json({ message: "Failed to load appointments" });
   }
 });
 

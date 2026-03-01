@@ -14,10 +14,23 @@ const ClientDashboard = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    const userEmail = localStorage.getItem("email");
+    
     if (!token) {
       setError("Not authenticated");
       setLoading(false);
       return;
+    }
+
+    // Set user name from localStorage if available
+    const savedName = localStorage.getItem("name");
+    if (savedName) {
+      setClientName(savedName);
+    } else if (userEmail) {
+      // Extract name from email or use a default
+      const nameFromEmail = userEmail.split('@')[0];
+      setClientName(nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1));
     }
 
     const fetchDashboard = async () => {
@@ -25,17 +38,31 @@ const ClientDashboard = () => {
         const res = await fetch(API.CLIENT_DASHBOARD, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        
+        // Check if response is JSON
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await res.text();
+          console.error('Received non-JSON response:', text);
+          throw new Error('Server error. Please try again later.');
+        }
+        
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to load");
 
         console.log("Dashboard data received:", data); // Debug log
 
-        setClientName(data?.user?.name || "Client");
+        // Update user name if available from API
+        if (data?.user?.name) {
+          setClientName(data.user.name);
+        }
+        
         setTotalVisits(data?.stats?.totalVisits || 0);
         setUpcomingAppointments(data?.stats?.upcomingAppointments || 0);
         setTotalBills(data?.stats?.totalBills || 0);
         setRecentAppointments(data?.recentAppointments || []);
       } catch (e) {
+        console.error("Dashboard error:", e);
         setError(e.message);
       } finally {
         setLoading(false);

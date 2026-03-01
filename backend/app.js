@@ -43,6 +43,37 @@ app.use('/admin', adminRoute);
 app.use('/services', servicesRoute);
 app.use('/ai', aiAdvisorRoute);
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  
+  // Don't send JSON if response has already been sent
+  if (res.headersSent) {
+    return next(err);
+  }
+  
+  // Always send JSON response for API routes
+  if (req.path.startsWith('/user') || req.path.startsWith('/admin') || req.path.startsWith('/attorney') || req.path.startsWith('/services')) {
+    res.status(err.status || 500).json({
+      message: err.message || 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+  } else {
+    next(err);
+  }
+});
+
+// 404 handler for API routes
+app.use((req, res, next) => {
+  if (req.path.startsWith('/user') || req.path.startsWith('/admin') || req.path.startsWith('/attorney') || req.path.startsWith('/services')) {
+    res.status(404).json({
+      message: 'API endpoint not found'
+    });
+  } else {
+    next();
+  }
+});
+
 dbConnect();
 
 app.listen(port);
