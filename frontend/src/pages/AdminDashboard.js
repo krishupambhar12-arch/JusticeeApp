@@ -5,7 +5,16 @@ import '../styles/adminDashboard.css';
 
 const AdminDashboard = () => {
   const [appointments, setAppointments] = useState([]);
-  const [stats, setStats] = useState({});
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalAttorneys: 0,
+    totalAppointments: 0,
+    pendingAppointments: 0,
+    confirmedAppointments: 0,
+    completedAppointments: 0,
+    expiredAppointments: 0,
+    totalFeedback: 0
+  });
   const [adminInfo, setAdminInfo] = useState({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -56,15 +65,57 @@ const AdminDashboard = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        // console.log('Dashboard data received:', data); // Debug log        
-        setStats(data.stats);
+        console.log('Dashboard data received:', data); // Debug log        
+        // Handle both formats: direct stats or wrapped in stats object
+        if (data.totalUsers !== undefined) {
+          // Backend returns stats directly
+          setStats(data);
+        } else if (data.stats) {
+          // Backend returns stats wrapped in stats object
+          setStats(data.stats);
+        } else {
+          // Set default empty stats if no data
+          setStats({
+            totalUsers: 0,
+            totalAttorneys: 0,
+            totalAppointments: 0,
+            pendingAppointments: 0,
+            confirmedAppointments: 0,
+            completedAppointments: 0,
+            expiredAppointments: 0,
+            totalFeedback: 0
+          });
+        }
         setAdminInfo(data.admin || {});
         setAppointments(data.recentAppointments || []);
       } else {
         setMessage(data.message || 'Error fetching dashboard data');
+        // Set default stats on error
+        setStats({
+          totalUsers: 0,
+          totalAttorneys: 0,
+          totalAppointments: 0,
+          pendingAppointments: 0,
+          confirmedAppointments: 0,
+          completedAppointments: 0,
+          expiredAppointments: 0,
+          totalFeedback: 0
+        });
       }
     } catch (error) {
+      console.error('Dashboard fetch error:', error);
       setMessage('Error connecting to server');
+      // Set default stats on error
+      setStats({
+        totalUsers: 0,
+        totalAttorneys: 0,
+        totalAppointments: 0,
+        pendingAppointments: 0,
+        confirmedAppointments: 0,
+        completedAppointments: 0,
+        expiredAppointments: 0,
+        totalFeedback: 0
+      });
     }
     setLoading(false);
   }, [token]);
@@ -146,7 +197,7 @@ const AdminDashboard = () => {
             </div>
             <div className="stat-card">
               <h3>Total Attorneys</h3>
-              <p className="stat-number">{stats.totalDoctors || 0}</p>
+              <p className="stat-number">{stats.totalAttorneys || 0}</p>
             </div>
             <div className="stat-card">
               <h3>Total Appointments</h3>
