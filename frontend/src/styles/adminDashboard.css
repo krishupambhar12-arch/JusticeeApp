@@ -1,6 +1,44 @@
 @import './variables.css';
 
 /* =======================
+   Promote to Admin Section */
+.promote-section {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.promote-section p {
+  margin: 0 0 15px 0;
+  color: #856404;
+  font-size: 14px;
+}
+
+.promote-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.promote-btn:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.promote-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+/* =======================
    Admin Dashboard Layout
    ======================= */
 .dashboard-page {

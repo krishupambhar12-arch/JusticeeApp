@@ -112,17 +112,13 @@ router.post("/register", upload.single("profilePicture"), async (req, res) => {
         name,
         email,
         password: password, // Let the pre-save hook handle hashing
-        phone: phone || "",
-        address: address || "",
-        dateOfBirth: dateOfBirth || null,
-        gender: gender || "",
-        role: role || "Client",
+        role: "Client"
       });
 
       await user.save();
 
       // Generate token for user
-      const token = generateToken(user._id, user.role);
+      const token = generateToken(user._id, "Client");
 
       res.status(201).json({
         message: "User registered successfully",
@@ -131,9 +127,7 @@ router.post("/register", upload.single("profilePicture"), async (req, res) => {
           id: user._id,
           name: user.name,
           email: user.email,
-          role: user.role,
-          phone: user.phone,
-          address: user.address,
+          role: "Client",
         },
       });
     }
@@ -143,13 +137,67 @@ router.post("/register", upload.single("profilePicture"), async (req, res) => {
   }
 });
 
+// ===== TEST USER MODEL =====
+router.get("/test-user-model", async (req, res) => {
+  try {
+    console.log("🔍 Testing User model...");
+    
+    // Test creating a user
+    const testUser = new User({
+      name: "Test User",
+      email: "test@example.com",
+      password: "test123",
+      role: "Client"
+    });
+
+    console.log("🔍 Test user created:", testUser);
+    
+    // Test validation
+    const validationError = testUser.validateSync();
+    if (validationError) {
+      console.error("❌ User model validation error:", validationError);
+      return res.status(500).json({ 
+        message: "User model validation failed",
+        error: validationError.message 
+      });
+    }
+
+    console.log("✅ User model validation passed");
+    res.json({ 
+      message: "User model test successful",
+      testUser: {
+        name: testUser.name,
+        email: testUser.email,
+        role: testUser.role,
+        isValid: !validationError
+      }
+    });
+  } catch (error) {
+    console.error("❌ User model test error:", error);
+    res.status(500).json({ 
+      message: "User model test failed",
+      error: error.message 
+    });
+  }
+});
+
 // User Login
 router.post("/login", async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    console.log("🔍 User login attempt started");
+    const { email, password } = req.body;
 
-    if (role === "Attorney") {
-      console.log("🔍 Attorney login attempt - checking Attorney table only");
+    console.log("🔍 Login data:", { email, passwordLength: password?.length });
+
+    // Validate input
+    if (!email || !password) {
+      console.log("❌ Missing email or password");
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // Check if attorney
+    if (email.toLowerCase().includes('@justice.com') || email.toLowerCase().includes('lawyer') || email.toLowerCase().includes('attorney')) {
+      console.log("🔍 Attorney login attempt detected");
       
       // Attorney login - check Attorney table ONLY
       const attorney = await Attorney.findOne({ attorneyEmail: email });
@@ -181,7 +229,7 @@ router.post("/login", async (req, res) => {
       // Generate token
       const token = generateToken(attorney._id, "Attorney");
 
-      res.json({
+      return res.json({
         message: "Attorney login successful",
         token,
         attorney: {
@@ -192,11 +240,15 @@ router.post("/login", async (req, res) => {
         },
       });
     } else {
-      console.log("🔍 Non-attorney login attempt - checking User table only");
+      console.log("🔍 Regular user login attempt - checking User table only");
       
       // Regular user login - check User table ONLY
       const user = await User.findOne({ email });
+      console.log("🔍 User lookup result:", { found: !!user, email: email });
+      
       if (!user) {
+        console.log("❌ User not found in User table");
+        
         // Check if this looks like a Gmail address and provide helpful message
         if (email.toLowerCase().includes('@gmail.com')) {
           return res.status(400).json({ 
@@ -206,17 +258,24 @@ router.post("/login", async (req, res) => {
           });
         }
         
-        // Double check: If Attorney record exists for this email, it's wrong
-        const attorneyRecord = await Attorney.findOne({ attorneyEmail: email });
-        if (attorneyRecord) {
-          console.log("⚠️ Found Attorney record for non-attorney email - this should not happen");
-        }
-        
         return res.status(400).json({ message: "Invalid credentials" });
       }
 
+      // Check if user is active
+      if (!user.isActive) {
+        console.log("❌ User account is inactive:", user.email);
+        return res.status(400).json({ 
+          message: "Your account has been deactivated. Please contact administrator.",
+          isInactive: true
+        });
+      }
+
+      console.log("🔍 User found, checking authentication for:", user.email);
+
       // Check if user is a Google user and needs to set password
       if (user.isSocialLogin && user.provider === 'google') {
+        console.log("🔍 Google user login attempt");
+        
         // Check if user has a default random password pattern (16 chars alphanumeric)
         if (user.password && user.password.length === 16 && user.password.match(/^[a-f0-9]+$/)) {
           return res.status(400).json({ 
@@ -226,21 +285,16 @@ router.post("/login", async (req, res) => {
             email: user.email
           });
         }
-        
-        // For Google users, check if they're trying to login with wrong password
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-          return res.status(400).json({ 
-            message: "This account was created with Google. Please use Google login or set a password first.",
-            requiresPasswordSetup: true,
-            isGoogleUser: true,
-            email: user.email
-          });
-        }
       } else {
+        console.log("🔍 Regular user password check");
+        
         // Regular password check for non-Google users
         const isMatch = await bcrypt.compare(password, user.password);
+        console.log("🔍 Password comparison result:", { match: isMatch, providedLength: password?.length, storedLength: user.password?.length });
+        
         if (!isMatch) {
+          console.log("❌ Password does not match for user:", user.email);
+          
           // Check if this looks like a Gmail address and user might be confused
           if (email.toLowerCase().includes('@gmail.com')) {
             return res.status(400).json({ 
@@ -254,10 +308,12 @@ router.post("/login", async (req, res) => {
         }
       }
 
+      console.log("✅ User authentication successful for:", user.email);
+
       // Generate token
       const token = generateToken(user._id, user.role);
 
-      res.json({
+      const response = {
         message: "Login successful",
         token,
         user: {
@@ -265,14 +321,16 @@ router.post("/login", async (req, res) => {
           name: user.name,
           email: user.email,
           role: user.role,
-          phone: user.phone,
-          address: user.address,
         },
-      });
+      };
+
+      console.log("✅ Sending successful login response for:", user.email);
+      return res.json(response);
     }
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("❌ Login error:", error);
+    console.error("❌ Error stack:", error.stack);
+    res.status(500).json({ message: "Server error during login" });
   }
 });
 
@@ -797,6 +855,35 @@ router.get("/appointments", async (req, res) => {
   } catch (error) {
     console.error("Appointments error:", error);
     res.status(500).json({ message: "Failed to retrieve appointments" });
+  }
+});
+
+// User Forgot Password
+router.post("/forgot-password", async (req, res) => {
+  try {
+    console.log("🔍 User forgot password request received");
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: "Email and new password are required" });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found with this email" });
+    }
+
+    // Update password
+    user.password = newPassword; // Will be hashed by pre-save hook
+    await user.save();
+
+    console.log("✅ User password updated successfully for:", email);
+    res.json({ message: "Password updated successfully" });
+
+  } catch (error) {
+    console.error("User forgot password error:", error);
+    res.status(500).json({ message: "Failed to update password" });
   }
 });
 

@@ -11,6 +11,39 @@ const AdminDashboard = () => {
   const [message, setMessage] = useState('');
 
   const token = localStorage.getItem('token');
+  const role = localStorage.getItem('role');
+
+  const handlePromoteToAdmin = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(API.PROMOTE_TO_ADMIN, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: localStorage.getItem('email'),
+          password: prompt('Enter your password to promote to admin:')
+        })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('role', 'Admin');
+        localStorage.setItem('token', data.token);
+        setMessage('Successfully promoted to admin! Refreshing...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        setMessage(data.message || 'Failed to promote to admin');
+      }
+    } catch (error) {
+      setMessage('Error promoting to admin');
+    }
+    setLoading(false);
+  };
 
   const fetchDashboardStats = useCallback(async () => {
     setLoading(true);
@@ -37,7 +70,7 @@ const AdminDashboard = () => {
   }, [token]);
 
   useEffect(() => {
-    // Check if user is authenticated and is admin
+    // Check if user is authenticated
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
 
@@ -47,8 +80,9 @@ const AdminDashboard = () => {
       return;
     }
 
+    // If user is not admin, show promote option
     if (role !== 'Admin') {
-      setMessage('Access denied. Admin privileges required.');
+      setMessage('Access denied. Admin privileges required. Click "Promote to Admin" if you want to upgrade your account.');
       setLoading(false);
       return;
     }
@@ -76,6 +110,20 @@ const AdminDashboard = () => {
           <div className="message">
             {message}
             <button onClick={() => setMessage('')}>×</button>
+          </div>
+        )}
+
+        {/* Show promote button if user is not admin */}
+        {role !== 'Admin' && (
+          <div className="promote-section">
+            <p>You are logged in as a regular user. Promote your account to admin to access dashboard features.</p>
+            <button 
+              className="promote-btn" 
+              onClick={handlePromoteToAdmin}
+              disabled={loading}
+            >
+              {loading ? 'Promoting...' : 'Promote to Admin'}
+            </button>
           </div>
         )}
 

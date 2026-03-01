@@ -35,6 +35,26 @@
   margin-bottom: 20px;
 }
 
+/* Status Badges */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-active {
+  background-color: #28a745;
+  color: white;
+}
+
+.status-inactive {
+  background-color: #6c757d;
+  color: white;
+}
+
 /* Users table */
 .users-table {
   width: 100%;

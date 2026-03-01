@@ -49,6 +49,183 @@ router.get("/test", (req, res) => {
   res.json({ message: "Admin routes are working!" });
 });
 
+// ===== INITIALIZE DEFAULT ADMIN =====
+router.post("/init-default-admin", async (req, res) => {
+  try {
+    console.log("🚀 Initializing default admin...");
+    
+    const defaultAdminEmail = "krishnapambhar@justice.com";
+    const defaultAdminPassword = "krishna123";
+
+    // Delete any existing records with this email
+    await User.deleteMany({ email: defaultAdminEmail });
+    await Admin.deleteMany({ email: defaultAdminEmail });
+    console.log("🗑️ Cleared existing records");
+
+    // Create default admin user
+    const defaultUser = new User({
+      name: "Krishna Pambhar",
+      email: defaultAdminEmail,
+      password: defaultAdminPassword,
+      role: "Admin"
+    });
+
+    await defaultUser.save();
+    console.log("✅ Created default admin user");
+
+    // Create admin record
+    const defaultAdminRecord = new Admin({
+      user_id: defaultUser._id,
+      email: defaultAdminEmail,
+      password: defaultAdminPassword,
+      name: "Krishna Pambhar",
+      permissions: [
+        "view_appointments",
+        "manage_appointments", 
+        "view_users",
+        "manage_users",
+        "view_doctors",
+        "manage_doctors",
+        "view_feedback",
+        "manage_feedback",
+        "view_services",
+        "manage_services"
+      ]
+    });
+
+    await defaultAdminRecord.save();
+    console.log("✅ Created default admin record");
+
+    res.json({
+      message: "Default admin initialized successfully!",
+      admin: {
+        email: defaultAdminEmail,
+        password: defaultAdminPassword,
+        name: "Krishna Pambhar"
+      },
+      loginUrl: "/admin/login"
+    });
+  } catch (error) {
+    console.error("Initialize admin error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+// ===== DIRECT ADMIN CREATION =====
+router.post("/create-admin-now", async (req, res) => {
+  try {
+    console.log("🔍 Creating admin user directly...");
+    
+    const adminEmail = "krishnapambhar@justice.com";
+    const adminPassword = "krishna@123";
+
+    // Delete any existing users with this email
+    await User.deleteMany({ email: adminEmail });
+    await Admin.deleteMany({ email: adminEmail });
+    console.log("🗑️ Deleted existing records");
+
+    // Create new admin user
+    const newUser = new User({
+      name: "Krishna Pambhar",
+      email: adminEmail,
+      password: adminPassword,
+      role: "Admin"
+    });
+
+    await newUser.save();
+    console.log("✅ Created new admin user:", newUser.email);
+
+    // Create admin record
+    const adminRecord = new Admin({
+      user_id: newUser._id,
+      email: adminEmail,
+      password: adminPassword,
+      name: "Krishna Pambhar",
+      permissions: [
+        "view_appointments",
+        "manage_appointments", 
+        "view_users",
+        "manage_users",
+        "view_doctors",
+        "manage_doctors",
+        "view_feedback",
+        "manage_feedback",
+        "view_services",
+        "manage_services"
+      ]
+    });
+
+    await adminRecord.save();
+    console.log("✅ Created admin record");
+
+    res.json({
+      message: "Admin created successfully!",
+      admin: {
+        email: adminEmail,
+        password: adminPassword,
+        name: "Krishna Pambhar",
+        userId: newUser._id,
+        adminId: adminRecord._id
+      }
+    });
+  } catch (error) {
+    console.error("Create admin error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+// ===== LIST ALL ROUTES =====
+router.get("/routes", (req, res) => {
+  const routes = router.stack.map(layer => {
+    if (layer.route) {
+      return {
+        path: layer.route.path,
+        methods: Object.keys(layer.route.methods)
+      };
+    }
+  }).filter(route => route);
+
+  res.json({
+    message: "Available admin routes",
+    routes: routes
+  });
+});
+
+// ===== CHECK ADMIN USER =====
+router.get("/check-admin", async (req, res) => {
+  try {
+    const adminEmail = "krishnapambhar@justice.com";
+    
+    // Check User table
+    const user = await User.findOne({ email: adminEmail });
+    
+    // Check Admin table
+    const admin = await Admin.findOne({ email: adminEmail });
+    
+    res.json({
+      message: "Admin check results",
+      userTable: user ? {
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        hasPassword: !!user.password,
+        passwordLength: user.password?.length
+      } : "NOT_FOUND",
+      adminTable: admin ? {
+        email: admin.email,
+        name: admin.name,
+        userId: admin.user_id,
+        hasPassword: !!admin.password,
+        passwordLength: admin.password?.length,
+        permissions: admin.permissions
+      } : "NOT_FOUND"
+    });
+  } catch (error) {
+    console.error("Check admin error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // ===== DEBUG ROUTE - Check Database Structure =====
 router.get("/debug-appointments", auth, async (req, res) => {
   try {
@@ -424,8 +601,8 @@ router.get("/users", auth, async (req, res) => {
       return res.status(403).json({ message: "Only admins can access this endpoint" });
     }
 
-    const users = await User.find({ role: "Client" })
-      .select('name email phone address dob gender')
+    const users = await User.find({ isActive: true })
+      .select('name email role isSocialLogin profilePicture provider providerId createdAt updatedAt')
       .sort({ createdAt: -1 })
       .lean();
 
@@ -433,10 +610,15 @@ router.get("/users", auth, async (req, res) => {
       id: user._id,
       name: user.name,
       email: user.email,
-      phone: user.phone,
-      address: user.address,
-      dob: user.dob ? new Date(user.dob).toISOString().split('T')[0] : user.dob,
-      gender: user.gender
+      role: user.role,
+      isSocialLogin: user.isSocialLogin,
+      profilePicture: user.profilePicture,
+      provider: user.provider,
+      providerId: user.providerId,
+      signupDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A',
+      signupTime: user.createdAt ? new Date(user.createdAt).toLocaleTimeString() : 'N/A',
+      lastLoginDate: user.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : 'N/A',
+      lastLoginTime: user.updatedAt ? new Date(user.updatedAt).toLocaleTimeString() : 'N/A'
     }));
 
     res.json({
@@ -503,31 +685,124 @@ router.post("/users", auth, async (req, res) => {
   }
 });
 
-// ===== DELETE User (Admin) =====
-router.delete("/users/:id", auth, async (req, res) => {
+// ===== RESTORE DELETED USER =====
+router.put("/users/:id/restore", auth, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.userRole !== "Admin") {
+      return res.status(403).json({ message: "Only admins can restore users" });
+    }
+
+    const userId = req.params.id;
+
+    // Find inactive user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Restore user
+    user.isActive = true;
+    user.deletedAt = null;
+    user.deletionReason = null;
+    await user.save();
+
+    console.log("✅ User restored successfully:", user.email);
+
+    res.json({ 
+      message: "User restored successfully. Data preserved in database.",
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        status: "active",
+        restoredAt: new Date()
+      }
+    });
+  } catch (error) {
+    console.error("Restore user error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ===== GET ALL USERS (INCLUDING INACTIVE) =====
+router.get("/all-users", auth, async (req, res) => {
   try {
     // Check if user is admin
     if (req.userRole !== "Admin") {
       return res.status(403).json({ message: "Only admins can access this endpoint" });
     }
 
-    const { id } = req.params;
+    const users = await User.find({})
+      .select('name email role isSocialLogin profilePicture provider providerId createdAt updatedAt isActive deletedAt deletionReason')
+      .sort({ createdAt: -1 })
+      .lean();
 
-    // Check if user exists
-    const user = await User.findById(id);
+    const formattedUsers = users.map(user => ({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isSocialLogin: user.isSocialLogin,
+      profilePicture: user.profilePicture,
+      provider: user.provider,
+      providerId: user.providerId,
+      signupDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A',
+      signupTime: user.createdAt ? new Date(user.createdAt).toLocaleTimeString() : 'N/A',
+      lastLoginDate: user.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : 'N/A',
+      lastLoginTime: user.updatedAt ? new Date(user.updatedAt).toLocaleTimeString() : 'N/A',
+      status: user.isActive ? 'active' : 'inactive',
+      deletedAt: user.deletedAt ? new Date(user.deletedAt).toLocaleDateString() : null,
+      deletionReason: user.deletionReason
+    }));
+
+    res.json({
+      message: "All users (including inactive)",
+      users: formattedUsers,
+      total: formattedUsers.length
+    });
+  } catch (error) {
+    console.error("Admin get all users error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ===== DELETE USER (SOFT DELETE - PREVENT ACTUAL DELETION) =====
+router.delete("/users/:id", auth, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.userRole !== "Admin") {
+      return res.status(403).json({ message: "Only admins can delete users" });
+    }
+
+    const userId = req.params.id;
+
+    // Find user but DO NOT delete - just mark as inactive
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Delete user's appointments first
-    await Appointment.deleteMany({ user_id: id });
+    // Mark user as inactive instead of deleting
+    user.isActive = false;
+    user.deletedAt = new Date();
+    user.deletionReason = "Admin soft delete";
+    await user.save();
 
-    // Delete user
-    await User.findByIdAndDelete(id);
+    console.log(" User marked as inactive (not deleted):", user.email);
 
-    res.json({ message: "User deleted successfully" });
+    res.json({ 
+      message: "User marked as inactive. Data preserved in database.",
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        status: "inactive",
+        deletedAt: user.deletedAt
+      }
+    });
   } catch (error) {
-    console.error("Admin delete user error:", error);
+    console.error("Soft delete user error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -1715,37 +1990,327 @@ router.delete("/services/:id", auth, async (req, res) => {
   }
 });
 
-// ===== ADMIN LOGIN =====
-router.post("/login", async (req, res) => {
+// ===== DELETE USER DATA (KEEP ADMIN) =====
+router.post("/delete-user-data", async (req, res) => {
   try {
     const { email, password } = req.body;
+    
+    console.log("🔍 Deleting user data for:", { email });
 
     // Validate input
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    // Find user by email
+    // Find user in User table
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    // Check if user is admin
-    if (user.role !== "Admin") {
-      return res.status(401).json({ message: "Access denied. Admin privileges required." });
+      return res.status(404).json({ message: "User not found" });
     }
 
     // Verify password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
+
+    // Check if user has admin record
+    const adminRecord = await Admin.findOne({ user_id: user._id });
+    
+    if (!adminRecord) {
+      return res.status(404).json({ message: "Admin record not found" });
+    }
+
+    // Delete user from User table
+    await User.deleteOne({ _id: user._id });
+    console.log("✅ Deleted user from User table");
+
+    // Keep admin record intact
+    console.log("✅ Admin record preserved in Admin table");
+
+    res.json({
+      message: "User data deleted successfully, admin data preserved",
+      deletedUser: {
+        email: user.email,
+        name: user.name
+      },
+      preservedAdmin: {
+        email: adminRecord.email,
+        name: adminRecord.name,
+        adminId: adminRecord._id,
+        permissions: adminRecord.permissions
+      }
+    });
+  } catch (error) {
+    console.error("Delete user data error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ===== GET ADMIN LOGIN HISTORY =====
+router.get("/login-history", auth, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.userRole !== "Admin") {
+      return res.status(403).json({ message: "Only admins can access login history" });
+    }
+
+    const adminRecords = await Admin.find({})
+      .select('email name lastLoginAt loginCount loginHistory')
+      .sort({ lastLoginAt: -1 })
+      .lean();
+
+    const formattedHistory = adminRecords.map(admin => ({
+      email: admin.email,
+      name: admin.name,
+      lastLoginAt: admin.lastLoginAt ? new Date(admin.lastLoginAt).toLocaleString() : 'Never',
+      loginCount: admin.loginCount || 0,
+      recentLogins: (admin.loginHistory || []).slice(-5).map(login => ({
+        time: new Date(login.loginTime).toLocaleString(),
+        ipAddress: login.ipAddress || 'Unknown',
+        userAgent: login.userAgent || 'Unknown'
+      }))
+    }));
+
+    res.json({
+      message: "Admin login history",
+      admins: formattedHistory,
+      total: formattedHistory.length
+    });
+  } catch (error) {
+    console.error("Get admin login history error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ===== PROMOTE USER TO ADMIN =====
+router.post("/promote-to-admin", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    console.log("🔍 Promote user to admin:", { email });
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // Find user in User table
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    // Verify password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
+
+    // Update user role to Admin
+    user.role = "Admin";
+    await user.save();
+    console.log("✅ User promoted to admin");
+
+    // Check if admin record exists
+    let adminRecord = await Admin.findOne({ user_id: user._id });
+    
+    if (!adminRecord) {
+      // Create admin record
+      adminRecord = new Admin({
+        user_id: user._id,
+        email: user.email,
+        password: password,
+        name: user.name,
+        permissions: [
+          "view_appointments",
+          "manage_appointments", 
+          "view_users",
+          "manage_users",
+          "view_doctors",
+          "manage_doctors",
+          "view_feedback",
+          "manage_feedback",
+          "view_services",
+          "manage_services"
+        ]
+      });
+      await adminRecord.save();
+      console.log("✅ Created admin record");
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        id: user._id, 
+        email: user.email, 
+        role: "Admin" 
+      },
+      process.env.JWT_SECRET || "secretKey",
+      { expiresIn: "24h" }
+    );
+
+    res.json({
+      message: "User promoted to admin successfully",
+      token,
+      admin: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: "Admin",
+        permissions: adminRecord.permissions
+      }
+    });
+  } catch (error) {
+    console.error("Promote to admin error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ===== ADMIN LOGIN =====
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    console.log("🔍 Admin login attempt:", { email, passwordLength: password?.length });
+
+    // Validate input
+    if (!email || !password) {
+      console.log("❌ Missing email or password");
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // CHECK FOR DEFAULT ADMIN CREDENTIALS
+    const defaultAdminEmail = "krishnapambhar@justice.com";
+    const defaultAdminPassword = "krishna123";
+    
+    if (email === defaultAdminEmail && password === defaultAdminPassword) {
+      console.log("🔑 Using default admin credentials");
+      
+      // Check if default admin exists
+      let user = await User.findOne({ email: defaultAdminEmail });
+      
+      if (!user) {
+        // Create default admin user
+        user = new User({
+          name: "Krishna Pambhar",
+          email: defaultAdminEmail,
+          password: defaultAdminPassword,
+          role: "Admin"
+        });
+        await user.save();
+        console.log("✅ Created default admin user");
+        
+        // Create admin record
+        const adminRecord = new Admin({
+          user_id: user._id,
+          email: defaultAdminEmail,
+          password: defaultAdminPassword,
+          name: "Krishna Pambhar",
+          permissions: [
+            "view_appointments",
+            "manage_appointments", 
+            "view_users",
+            "manage_users",
+            "view_doctors",
+            "manage_doctors",
+            "view_feedback",
+            "manage_feedback",
+            "view_services",
+            "manage_services"
+          ]
+        });
+        await adminRecord.save();
+        console.log("✅ Created admin record");
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          id: user._id, 
+          email: user.email, 
+          role: user.role 
+        },
+        process.env.JWT_SECRET || "secretKey",
+        { expiresIn: "24h" }
+      );
+
+      console.log("✅ Default admin login successful");
+      
+      return res.json({
+        message: "Admin login successful",
+        token,
+        admin: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          permissions: [
+            "view_appointments",
+            "manage_appointments", 
+            "view_users",
+            "manage_users",
+            "view_doctors",
+            "manage_doctors",
+            "view_feedback",
+            "manage_feedback",
+            "view_services",
+            "manage_services"
+          ]
+        }
+      });
+      });
+    }
+
+    // Find user by email (for non-default admins)
+    const user = await User.findOne({ email });
+    console.log("🔍 User found:", user ? { email: user.email, role: user.role, hasPassword: !!user.password } : "NO");
+    
+    if (!user) {
+      console.log("❌ User not found");
       return res.status(401).json({ message: "Invalid email or password" });
     }
+
+    // Check if user is admin
+    if (user.role !== "Admin") {
+      console.log("❌ User is not admin, role:", user.role);
+      return res.status(401).json({ message: "Access denied. Admin privileges required." });
+    }
+
+    // Verify password
+    console.log("🔍 Comparing passwords...");
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log("🔍 Password match result:", isMatch);
+    
+    if (!isMatch) {
+      console.log("❌ Password does not match");
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // UPDATE ADMIN TABLE WITH LOGIN DATA (NOT USER TABLE)
+    await Admin.findOneAndUpdate(
+      { user_id: user._id },
+      { 
+        lastLoginAt: new Date(),
+        loginCount: await Admin.findOne({ user_id: user._id }).then(admin => admin ? admin.loginCount + 1 : 1),
+        $push: {
+          loginHistory: {
+            loginTime: new Date(),
+            ipAddress: req.ip || req.connection.remoteAddress,
+            userAgent: req.get('User-Agent')
+          }
+        }
+      },
+      { upsert: true }
+    );
+    console.log("✅ Admin login data saved to Admin table");
 
     // Get admin details
     const adminDetails = await Admin.findOne({ user_id: user._id })
       .populate('user_id', 'name email')
       .lean();
+
+    console.log("✅ Admin login successful for:", email);
 
     // Generate JWT token
     const token = jwt.sign(
@@ -1779,16 +2344,16 @@ router.post("/login", async (req, res) => {
 router.post("/setup-default", async (req, res) => {
   try {
     // Check if default admin already exists
-    const existingAdmin = await User.findOne({ email: "admin@gmail.com" });
+    const existingAdmin = await User.findOne({ email: "krishnapambhar@justice.com" });
     if (existingAdmin) {
       return res.status(400).json({ message: "Default admin already exists" });
     }
 
     // Create default admin user
     const defaultAdmin = new User({
-      name: "System Administrator",
-      email: "admin@gmail.com",
-      password: "admin123",
+      name: "Krishna Pambhar",
+      email: "krishnapambhar@justice.com",
+      password: "krishna@123",
       role: "Admin"
     });
 
@@ -1816,13 +2381,123 @@ router.post("/setup-default", async (req, res) => {
     res.json({
       message: "Default admin user created successfully",
       admin: {
-        email: "admin@gmail.com",
-        password: "admin123",
-        name: "System Administrator"
+        email: "krishnapambhar@justice.com",
+        password: "krishna@123",
+        name: "Krishna Pambhar"
       }
     });
   } catch (error) {
     console.error("Create default admin error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ===== CREATE/UPDATE ADMIN (for user's credentials) =====
+router.post("/setup-krishna-admin", async (req, res) => {
+  try {
+    const adminEmail = "krishnapambhar@justice.com";
+    const adminPassword = "krishna@123";
+
+    // Check if admin already exists in User table
+    let existingUser = await User.findOne({ email: adminEmail });
+    
+    if (existingUser) {
+      // Update existing user password
+      existingUser.password = adminPassword; // Will be hashed by pre-save hook
+      existingUser.role = "Admin";
+      await existingUser.save();
+      console.log("✅ Updated existing user password");
+    } else {
+      // Create new admin user
+      const newUser = new User({
+        name: "Krishna Pambhar",
+        email: adminEmail,
+        password: adminPassword,
+        role: "Admin"
+      });
+
+      await newUser.save();
+      console.log("✅ Created new admin user");
+      existingUser = newUser;
+    }
+
+    // Check if admin record exists in Admin table
+    let existingAdmin = await Admin.findOne({ user_id: existingUser._id });
+    
+    if (existingAdmin) {
+      // Update existing admin record
+      existingAdmin.permissions = [
+        "view_appointments",
+        "manage_appointments", 
+        "view_users",
+        "manage_users",
+        "view_doctors",
+        "manage_doctors",
+        "view_feedback",
+        "manage_feedback",
+        "view_services",
+        "manage_services"
+      ];
+      await existingAdmin.save();
+      console.log("✅ Updated existing admin permissions");
+    } else {
+      // Create new admin record
+      const adminRecord = new Admin({
+        user_id: existingUser._id,
+        permissions: [
+          "view_appointments",
+          "manage_appointments", 
+          "view_users",
+          "manage_users",
+          "view_doctors",
+          "manage_doctors",
+          "view_feedback",
+          "manage_feedback",
+          "view_services",
+          "manage_services"
+        ]
+      });
+
+      await adminRecord.save();
+      console.log("✅ Created new admin permissions");
+    }
+
+    // Also create a direct admin record with email for reference
+    await Admin.deleteMany({ email: adminEmail }); // Remove any existing records
+    const directAdminRecord = new Admin({
+      user_id: existingUser._id,
+      email: adminEmail, // Store email directly in Admin table
+      password: adminPassword, // Store password directly in Admin table
+      name: "Krishna Pambhar",
+      permissions: [
+        "view_appointments",
+        "manage_appointments", 
+        "view_users",
+        "manage_users",
+        "view_doctors",
+        "manage_doctors",
+        "view_feedback",
+        "manage_feedback",
+        "view_services",
+        "manage_services"
+      ]
+    });
+
+    await directAdminRecord.save();
+    console.log("✅ Created direct admin record in Admin table");
+
+    res.json({
+      message: "Admin setup completed successfully in both User and Admin tables",
+      admin: {
+        email: adminEmail,
+        password: adminPassword,
+        name: "Krishna Pambhar",
+        userId: existingUser._id,
+        adminId: directAdminRecord._id
+      }
+    });
+  } catch (error) {
+    console.error("Setup admin error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });

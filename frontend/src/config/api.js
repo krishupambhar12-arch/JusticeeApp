@@ -30,14 +30,14 @@ export const API = {
   ADMIN_USERS: `${BASE_URL}/admin/users`,
   ADMIN_CREATE_USER: `${BASE_URL}/admin/users`,
   ADMIN_DELETE_USER: `${BASE_URL}/admin/users`,
-  ADMIN_BOOK_APPOINTMENT: `${BASE_URL}/admin/appointments`,
+  ADMIN_ALL_USERS: `${BASE_URL}/admin/all-users`,
+  ADMIN_RESTORE_USER: `${BASE_URL}/admin/users`,
   ADMIN_DOCTORS: `${BASE_URL}/admin/doctors`,
   ADMIN_CREATE: `${BASE_URL}/admin/create`,
   ADMIN_LIST: `${BASE_URL}/admin/list`,
   ADMIN_UPDATE_PERMISSIONS: `${BASE_URL}/admin/permissions`,
   ADMIN_DELETE: `${BASE_URL}/admin`,
   ADMIN_MARK_EXPIRED: `${BASE_URL}/admin/mark-expired`,
-  // Admin Feedback APIs
   ADMIN_FEEDBACK: `${BASE_URL}/admin/feedback`,
   ADMIN_UPDATE_FEEDBACK_STATUS: `${BASE_URL}/admin/feedback`,
   ADMIN_RESPOND_FEEDBACK: `${BASE_URL}/admin/feedback`,
@@ -76,5 +76,7 @@ export const API = {
   // Admin Consultation APIs
   ADMIN_CONSULTATIONS: `${BASE_URL}/admin/consultations`,
   ADMIN_CONSULTATION_MESSAGES: `${BASE_URL}/admin/consultations`,
-  ADMIN_REPLY_CONSULTATION: `${BASE_URL}/admin/consultations`
+  ADMIN_REPLY_CONSULTATION: `${BASE_URL}/admin/consultations`,
+  PROMOTE_TO_ADMIN: `${BASE_URL}/admin/promote-to-admin`,
+  DELETE_USER_DATA: `${BASE_URL}/admin/delete-user-data`,
 };

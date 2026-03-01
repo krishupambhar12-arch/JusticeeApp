@@ -10,16 +10,13 @@ const AdminPatients = () => {
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [actionLoading, setActionLoading] = useState({
     creating: false,
-    deleting: null
+    deleting: null,
+    restoring: null
   });
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: '',
-    gender: '',
-    phone: '',
-    address: '',
-    dob: ''
+    password: ''
   });
 
   const token = localStorage.getItem('token');
@@ -50,28 +47,60 @@ const AdminPatients = () => {
   }, [token]);
 
   const deleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this client? This will also delete all their appointments.')) {
-      setActionLoading(prev => ({ ...prev, deleting: userId }));
-      try {
-        const response = await fetch(`${API.ADMIN_DELETE_USER}/${userId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setMessage('Client deleted successfully');
-          fetchUsers(); // Refresh the list
-        } else {
-          setMessage(data.message || 'Error deleting client');
+    if (!window.confirm('Are you sure you want to mark this user as inactive? Their data will be preserved in the database.')) {
+      return;
+    }
+
+    setActionLoading(prev => ({ ...prev, deleting: userId }));
+    try {
+      const response = await fetch(`${API.ADMIN_DELETE_USER}/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      } catch (error) {
-        setMessage('Error connecting to server');
-      } finally {
-        setActionLoading(prev => ({ ...prev, deleting: null }));
+      });
+      
+      const data = await response.json();
+      if (response.ok) {
+        setMessage(data.message || 'User marked as inactive successfully');
+        fetchUsers(); // Refresh the list
+      } else {
+        setMessage(data.message || 'Error marking user as inactive');
       }
+    } catch (error) {
+      setMessage('Error connecting to server');
+    } finally {
+      setActionLoading(prev => ({ ...prev, deleting: null }));
+    }
+  };
+
+  const restoreUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to restore this user?')) {
+      return;
+    }
+
+    setActionLoading(prev => ({ ...prev, restoring: userId }));
+    try {
+      const response = await fetch(`${API.ADMIN_RESTORE_USER}/${userId}/restore`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      if (response.ok) {
+        setMessage(data.message || 'User restored successfully');
+        fetchUsers(); // Refresh the list
+      } else {
+        setMessage(data.message || 'Error restoring user');
+      }
+    } catch (error) {
+      setMessage('Error connecting to server');
+    } finally {
+      setActionLoading(prev => ({ ...prev, restoring: null }));
     }
   };
 
@@ -108,11 +137,7 @@ const AdminPatients = () => {
         setFormData({
           name: '',
           email: '',
-          password: '',
-          gender: '',
-          phone: '',
-          address: '',
-          dob: ''
+          password: ''
         });
         fetchUsers(); // Refresh the list
       } else {
@@ -193,46 +218,6 @@ const AdminPatients = () => {
                       required
                     />
                   </div>
-                  <div className="form-group">
-                    <label>Gender</label>
-                    <select
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleInputChange}
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Phone</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Address</label>
-                    <textarea
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      rows="3"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Date of Birth</label>
-                    <input
-                      type="date"
-                      name="dob"
-                      value={formData.dob}
-                      onChange={handleInputChange}
-                    />
-                  </div>
                   <div className="form-actions">
                     <button
                       type="button"
@@ -260,10 +245,11 @@ const AdminPatients = () => {
                 <tr>
                   <th>Name</th>
                   <th>Email</th>
-                  <th>Phone</th>
-                  <th>Gender</th>
-                  <th>Address</th>
-                  <th>Date of Birth</th>
+                  <th>Signup Date</th>
+                  <th>Signup Time</th>
+                  <th>Last Login Date</th>
+                  <th>Last Login Time</th>
+                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -272,25 +258,40 @@ const AdminPatients = () => {
                   <tr key={user.id}>
                     <td>{user.name}</td>
                     <td>{user.email}</td>
-                    <td>{user.phone}</td>
-                    <td>{user.gender}</td>
-                    <td>{user.address}</td>
-                    <td>{user.dob}</td>
+                    <td>{user.signupDate}</td>
+                    <td>{user.signupTime}</td>
+                    <td>{user.lastLoginDate}</td>
+                    <td>{user.lastLoginTime}</td>
+                    <td>
+                      <span className={`status-badge ${user.status === 'active' ? 'status-active' : 'status-inactive'}`}>
+                        {user.status || 'active'}
+                      </span>
+                    </td>
                     <td>
                       <div className="user-actions">
-                        <button
-                          onClick={() => deleteUser(user.id)}
-                          className="btn btn-danger"
-                          disabled={actionLoading.deleting === user.id}
-                        >
-                          {actionLoading.deleting === user.id ? 'Please wait...' : 'Delete'}
-                        </button>
+                        {user.status === 'inactive' ? (
+                          <button
+                            onClick={() => restoreUser(user.id)}
+                            className="btn btn-success"
+                            disabled={actionLoading.restoring === user.id}
+                          >
+                            {actionLoading.restoring === user.id ? 'Please wait...' : 'Restore'}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => deleteUser(user.id)}
+                            className="btn btn-danger"
+                            disabled={actionLoading.deleting === user.id}
+                          >
+                            {actionLoading.deleting === user.id ? 'Please wait...' : 'Delete'}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="7" className="no-users">No clients found</td>
+                    <td colSpan="8" className="no-users">No clients found</td>
                   </tr>
                 )}
               </tbody>
