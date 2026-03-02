@@ -3,6 +3,9 @@ import { API } from '../config/api';
 import AdminSidebar from '../components/AdminSidebar';
 import '../styles/adminAppointments.css';
 
+
+
+
 const AdminAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);

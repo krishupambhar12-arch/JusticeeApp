@@ -117,6 +117,7 @@
   padding: 24px;
 }
 
+<<<<<<< HEAD
 .view-details {
   padding: 24px;
 }
@@ -140,6 +141,8 @@
   word-break: break-word;
 }
 
+=======
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
 .form-row {
   display: flex;
   gap: 16px;
@@ -227,6 +230,7 @@
   background-color: #1e7e34;
 }
 
+<<<<<<< HEAD
 .btn-view {
   background-color: #17a2b8;
   color: white;
@@ -237,6 +241,8 @@
   background-color: #138496;
 }
 
+=======
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
 .btn-delete {
   background-color: #dc3545;
   color: white;

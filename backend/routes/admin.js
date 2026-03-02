@@ -10,7 +10,10 @@ const LabTestBooking = require("../models/LabTestBooking");
 const Consultation = require("../models/Consultation");
 const ConsultationMessage = require("../models/ConsultationMessage");
 const Service = require("../models/Service");
+<<<<<<< HEAD
 const Code = require("../models/Code");
+=======
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
 const auth = require("../middleware/auth");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -227,6 +230,7 @@ router.delete("/users/:id", auth, async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // ===== CODE/ATTORNEY CRUD ROUTES =====
 
 // GET ALL CODES/ATTORNEYS
@@ -370,4 +374,6 @@ router.delete("/doctors/:id", auth, async (req, res) => {
   }
 });
 
+=======
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
 module.exports = router;

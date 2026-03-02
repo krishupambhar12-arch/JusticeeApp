@@ -9,6 +9,7 @@ const AdminDoctors = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+<<<<<<< HEAD
   const [showViewModal, setShowViewModal] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState(null);
   const [viewingDoctor, setViewingDoctor] = useState(null);
@@ -21,6 +22,9 @@ const AdminDoctors = () => {
     }
     return result;
   };
+=======
+  const [editingDoctor, setEditingDoctor] = useState(null);
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
   const [actionLoading, setActionLoading] = useState({
     creating: false,
     updating: false,
@@ -28,6 +32,7 @@ const AdminDoctors = () => {
   });
   const [formData, setFormData] = useState({
     name: '',
+<<<<<<< HEAD
     qualification: '',
     gender: 'Male',
     joiningDate: '',
@@ -35,6 +40,33 @@ const AdminDoctors = () => {
   });
   const [formErrors, setFormErrors] = useState({});
 
+=======
+    email: '',
+    password: '',
+    phone: '',
+    gender: 'Male',
+    address: '',
+    specialization: '',
+    qualification: '',
+    experience: '',
+    fees: ''
+  });
+  const [formErrors, setFormErrors] = useState({});
+
+  const specializations = [
+    'Civil Law',
+    'Corporate Law', 
+    'Family Law',
+    'Criminal Law',
+    'Real Estate Law',
+    'Tax Law',
+    'Immigration Law',
+    'Intellectual Property Law',
+    'Labor Law',
+    'Environmental Law'
+  ];
+
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
   const token = localStorage.getItem('token');
 
   useEffect(() => {
@@ -71,10 +103,34 @@ const AdminDoctors = () => {
       errors.name = 'Name must be at least 2 characters';
     }
     
+<<<<<<< HEAD
+=======
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = 'Email is invalid';
+    }
+    
+    if (!editingDoctor && !formData.password.trim()) {
+      errors.password = 'Password is required';
+    } else if (formData.password && formData.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    }
+    
+    if (!formData.phone.trim()) {
+      errors.phone = 'Phone is required';
+    }
+    
+    if (!formData.specialization.trim()) {
+      errors.specialization = 'Specialization is required';
+    }
+    
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
     if (!formData.qualification.trim()) {
       errors.qualification = 'Qualification is required';
     }
     
+<<<<<<< HEAD
     if (!formData.gender) {
       errors.gender = 'Gender is required';
     }
@@ -87,6 +143,14 @@ const AdminDoctors = () => {
       errors.attorneyCode = 'Attorney code is required';
     } else if (!/^[a-zA-Z0-9]{4,6}$/.test(formData.attorneyCode)) {
       errors.attorneyCode = 'Attorney code must be 4-6 alphanumeric characters';
+=======
+    if (!formData.experience || formData.experience <= 0) {
+      errors.experience = 'Experience is required and must be greater than 0';
+    }
+    
+    if (!formData.fees || formData.fees <= 0) {
+      errors.fees = 'Fees is required and must be greater than 0';
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
     }
     
     setFormErrors(errors);
@@ -110,7 +174,12 @@ const AdminDoctors = () => {
 
     setActionLoading(prev => ({ ...prev, creating: true }));
     try {
+<<<<<<< HEAD
       const response = await fetch(API.ADMIN_DOCTORS, {
+=======
+      // First create user account
+      const userResponse = await fetch(API.ADMIN_CREATE, {
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -118,6 +187,7 @@ const AdminDoctors = () => {
         },
         body: JSON.stringify({
           name: formData.name,
+<<<<<<< HEAD
           qualification: formData.qualification,
           gender: formData.gender,
           joiningDate: formData.joiningDate,
@@ -134,6 +204,73 @@ const AdminDoctors = () => {
         fetchDoctors();
       } else {
         setMessage(data.message || 'Error creating attorney');
+=======
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone,
+          address: formData.address,
+          gender: formData.gender,
+          role: 'Attorney'
+        })
+      });
+
+      const userData = await userResponse.json();
+      
+      if (userResponse.ok) {
+        // Then create attorney profile with comprehensive details
+        const attorneyResponse = await fetch(API.ADMIN_DOCTORS, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            userId: userData.user._id,
+            // Professional Details
+            attorneyName: formData.name,
+            specialization: formData.specialization,
+            qualification: formData.qualification,
+            experience: parseInt(formData.experience),
+            fees: parseFloat(formData.fees),
+            yearsInPractice: parseInt(formData.experience) || 0, // Same as experience for now
+            education: formData.qualification || "",
+            university: "",
+            barNumber: "",
+            licenseNumber: "",
+            bio: "",
+            // Contact Details
+            officeAddress: formData.address || "",
+            city: "",
+            state: "",
+            zipCode: "",
+            phone: formData.phone || "",
+            website: "",
+            linkedin: "",
+            // Practice Details
+            languages: [],
+            practiceAreas: [formData.specialization],
+            availableDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+            availableTime: {
+              start: "09:00",
+              end: "17:00"
+            },
+            achievements: []
+          })
+        });
+
+        const attorneyData = await attorneyResponse.json();
+        
+        if (attorneyResponse.ok) {
+          setMessage('Attorney created successfully');
+          setShowAddModal(false);
+          resetForm();
+          fetchDoctors();
+        } else {
+          setMessage(attorneyData.message || 'Error creating attorney profile');
+        }
+      } else {
+        setMessage(userData.message || 'Error creating user account');
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
       }
     } catch (error) {
       setMessage('Error connecting to server');
@@ -142,6 +279,7 @@ const AdminDoctors = () => {
     }
   };
 
+<<<<<<< HEAD
   const handleViewDoctor = (doctor) => {
     setViewingDoctor(doctor);
     setShowViewModal(true);
@@ -152,14 +290,28 @@ const AdminDoctors = () => {
     setViewingDoctor(null);
   };
 
+=======
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
   const handleEditDoctor = (doctor) => {
     setEditingDoctor(doctor);
     setFormData({
       name: doctor.name || '',
+<<<<<<< HEAD
       qualification: doctor.qualification || '',
       gender: doctor.gender || 'Male',
       joiningDate: doctor.joiningDate ? new Date(doctor.joiningDate).toISOString().split('T')[0] : '',
       attorneyCode: doctor.attorneyCode || ''
+=======
+      email: doctor.email || '',
+      password: '',
+      phone: doctor.phone || '',
+      gender: doctor.gender || 'Male',
+      address: doctor.address || '',
+      specialization: doctor.specialization || '',
+      qualification: doctor.qualification || '',
+      experience: doctor.experience?.toString() || '',
+      fees: doctor.fees?.toString() || ''
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
     });
     setShowAddModal(true);
   };
@@ -174,7 +326,12 @@ const AdminDoctors = () => {
 
     setActionLoading(prev => ({ ...prev, updating: true }));
     try {
+<<<<<<< HEAD
       const response = await fetch(`${API.ADMIN_DOCTORS}/${editingDoctor.id}`, {
+=======
+      // Update user information
+      const userResponse = await fetch(`${API.ADMIN_UPDATE}/${editingDoctor.userId}`, {
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -182,6 +339,7 @@ const AdminDoctors = () => {
         },
         body: JSON.stringify({
           name: formData.name,
+<<<<<<< HEAD
           qualification: formData.qualification,
           gender: formData.gender,
           joiningDate: formData.joiningDate,
@@ -190,6 +348,31 @@ const AdminDoctors = () => {
       });
 
       if (response.ok) {
+=======
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          gender: formData.gender
+        })
+      });
+
+      // Update attorney information
+      const attorneyResponse = await fetch(`${API.ADMIN_DOCTORS}/${editingDoctor.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          specialization: formData.specialization,
+          qualification: formData.qualification,
+          experience: parseInt(formData.experience),
+          fees: parseFloat(formData.fees)
+        })
+      });
+
+      if (userResponse.ok && attorneyResponse.ok) {
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
         setMessage('Attorney updated successfully');
         setShowAddModal(false);
         setEditingDoctor(null);
@@ -235,10 +418,22 @@ const AdminDoctors = () => {
   const resetForm = () => {
     setFormData({
       name: '',
+<<<<<<< HEAD
       qualification: '',
       gender: 'Male',
       joiningDate: '',
       attorneyCode: ''
+=======
+      email: '',
+      password: '',
+      phone: '',
+      gender: 'Male',
+      address: '',
+      specialization: '',
+      qualification: '',
+      experience: '',
+      fees: ''
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
     });
     setFormErrors({});
   };
@@ -249,6 +444,7 @@ const AdminDoctors = () => {
     resetForm();
   };
 
+<<<<<<< HEAD
   const handleOpenAddModal = () => {
     setEditingDoctor(null);
     resetForm();
@@ -260,6 +456,8 @@ const AdminDoctors = () => {
     setShowAddModal(true);
   };
 
+=======
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
   return (
     <div className="dashboard-page">
       <AdminSidebar />
@@ -277,7 +475,11 @@ const AdminDoctors = () => {
           <div className="doctors-header">
             <h2>All Attorneys</h2>
             <button 
+<<<<<<< HEAD
               onClick={handleOpenAddModal}
+=======
+              onClick={() => setShowAddModal(true)}
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
               className="btn btn-primary"
             >
               + Add Attorney
@@ -290,10 +492,19 @@ const AdminDoctors = () => {
                 <thead>
                   <tr>
                     <th>Name</th>
+<<<<<<< HEAD
                     <th>Qualification</th>
                     <th>Gender</th>
                     <th>Joining Date</th>
                     <th>Attorney Code</th>
+=======
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Specialization</th>
+                    <th>Fees</th>
+                    <th>Experience</th>
+                    <th>Qualification</th>
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -301,10 +512,19 @@ const AdminDoctors = () => {
                   {doctors.map(doctor => (
                     <tr key={doctor.id}>
                       <td>{doctor.name}</td>
+<<<<<<< HEAD
                       <td>{doctor.qualification}</td>
                       <td>{doctor.gender}</td>
                       <td>{doctor.joiningDate ? new Date(doctor.joiningDate).toLocaleDateString() : 'N/A'}</td>
                       <td>{doctor.attorneyCode}</td>
+=======
+                      <td>{doctor.email}</td>
+                      <td>{doctor.phone}</td>
+                      <td>{doctor.specialization}</td>
+                      <td>₹{doctor.fees}</td>
+                      <td>{doctor.experience} years</td>
+                      <td>{doctor.qualification}</td>
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
                       <td>
                         <button
                           onClick={() => handleEditDoctor(doctor)}
@@ -314,6 +534,7 @@ const AdminDoctors = () => {
                           Edit
                         </button>
                         <button
+<<<<<<< HEAD
                           onClick={() => handleViewDoctor(doctor)}
                           className="btn btn-view"
                           disabled={actionLoading.deleting === doctor.id}
@@ -321,6 +542,8 @@ const AdminDoctors = () => {
                           View
                         </button>
                         <button
+=======
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
                           onClick={() => handleDeleteDoctor(doctor.id)}
                           className="btn btn-delete"
                           disabled={actionLoading.deleting === doctor.id}
@@ -351,6 +574,7 @@ const AdminDoctors = () => {
                 <button className="modal-close" onClick={handleCloseModal}>×</button>
               </div>
               <form onSubmit={editingDoctor ? handleUpdateDoctor : handleAddDoctor}>
+<<<<<<< HEAD
                 <div className="form-group">
                   <label htmlFor="name">Name *</label>
                   <input
@@ -446,6 +670,164 @@ const AdminDoctors = () => {
                   {formErrors.attorneyCode && (
                     <span className="error-message">{formErrors.attorneyCode}</span>
                   )}
+=======
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="name">Name *</label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className={formErrors.name ? 'error' : ''}
+                    />
+                    {formErrors.name && (
+                      <span className="error-message">{formErrors.name}</span>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="email">Email *</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className={formErrors.email ? 'error' : ''}
+                    />
+                    {formErrors.email && (
+                      <span className="error-message">{formErrors.email}</span>
+                    )}
+                  </div>
+                </div>
+
+                {!editingDoctor && (
+                  <div className="form-group">
+                    <label htmlFor="password">Password *</label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className={formErrors.password ? 'error' : ''}
+                    />
+                    {formErrors.password && (
+                      <span className="error-message">{formErrors.password}</span>
+                    )}
+                  </div>
+                )}
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="phone">Phone *</label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className={formErrors.phone ? 'error' : ''}
+                    />
+                    {formErrors.phone && (
+                      <span className="error-message">{formErrors.phone}</span>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="gender">Gender</label>
+                    <select
+                      id="gender"
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleInputChange}
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="address">Address</label>
+                  <input
+                    type="text"
+                    id="address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="specialization">Specialization *</label>
+                    <select
+                      id="specialization"
+                      name="specialization"
+                      value={formData.specialization}
+                      onChange={handleInputChange}
+                      className={formErrors.specialization ? 'error' : ''}
+                    >
+                      <option value="">Select Specialization</option>
+                      {specializations.map(spec => (
+                        <option key={spec} value={spec}>{spec}</option>
+                      ))}
+                    </select>
+                    {formErrors.specialization && (
+                      <span className="error-message">{formErrors.specialization}</span>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="qualification">Qualification *</label>
+                    <input
+                      type="text"
+                      id="qualification"
+                      name="qualification"
+                      value={formData.qualification}
+                      onChange={handleInputChange}
+                      className={formErrors.qualification ? 'error' : ''}
+                    />
+                    {formErrors.qualification && (
+                      <span className="error-message">{formErrors.qualification}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="experience">Experience (years) *</label>
+                    <input
+                      type="number"
+                      id="experience"
+                      name="experience"
+                      value={formData.experience}
+                      onChange={handleInputChange}
+                      min="0"
+                      className={formErrors.experience ? 'error' : ''}
+                    />
+                    {formErrors.experience && (
+                      <span className="error-message">{formErrors.experience}</span>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="fees">Fees (₹) *</label>
+                    <input
+                      type="number"
+                      id="fees"
+                      name="fees"
+                      value={formData.fees}
+                      onChange={handleInputChange}
+                      min="0"
+                      step="0.01"
+                      className={formErrors.fees ? 'error' : ''}
+                    />
+                    {formErrors.fees && (
+                      <span className="error-message">{formErrors.fees}</span>
+                    )}
+                  </div>
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
                 </div>
 
                 <div className="modal-actions">
@@ -472,6 +854,7 @@ const AdminDoctors = () => {
             </div>
           </div>
         )}
+<<<<<<< HEAD
 
         {/* View Modal */}
         {showViewModal && viewingDoctor && (
@@ -515,6 +898,8 @@ const AdminDoctors = () => {
             </div>
           </div>
         )}
+=======
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
       </div>
     </div>
   );

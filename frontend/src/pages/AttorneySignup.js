@@ -10,8 +10,12 @@ const AttorneySignup = () => {
     email: "",
     gender: "",
     password: "",
+<<<<<<< HEAD
     confirmPassword: "",
     attorneyCode: ""
+=======
+    confirmPassword: ""
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -51,12 +55,15 @@ const AttorneySignup = () => {
       newErrors.confirmPassword = 'Passwords do not match';
     }
     
+<<<<<<< HEAD
     if (!formData.attorneyCode.trim()) {
       newErrors.attorneyCode = 'Attorney Code is required';
     } else if (formData.attorneyCode.trim().length !== 5) {
       newErrors.attorneyCode = 'Attorney Code must be 5 characters long';
     }
     
+=======
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -205,6 +212,7 @@ const AttorneySignup = () => {
             {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
           </div>
 
+<<<<<<< HEAD
           <div className="form-group">
             <label htmlFor="attorneyCode">Attorney Code *</label>
             <input
@@ -222,6 +230,8 @@ const AttorneySignup = () => {
             </small>
           </div>
 
+=======
+>>>>>>> 5790a828781d40e646cdf5a78cc216e54b40bd7f
           <button type="submit" className="admin-login-btn" disabled={loading}>
             {loading ? 'Please wait...' : 'Submit'}
           </button>
